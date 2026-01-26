@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import FirebaseAuth
 
 struct FamilySharingView: View {
     @Environment(\.modelContext) private var modelContext
@@ -249,10 +250,16 @@ struct FamilySharingView: View {
         
         Task {
             do {
-                // 1. ローカルデータを移行
+                // 1. 匿名ログイン（未ログインの場合のみ）
+                if Auth.auth().currentUser == nil {
+                    let result = try await Auth.auth().signInAnonymously()
+                    print("✅ Firebase匿名ログイン成功: User ID: \(result.user.uid)")
+                }
+                
+                // 2. ローカルデータを移行（ログイン完了後）
                 try await DataMigrationService.shared.migrateToFirestore(householdID: newID, context: modelContext)
                 
-                // 2. 成功したらIDを保存
+                // 3. 成功したらIDを保存
                 DispatchQueue.main.async {
                     self.householdID = newID
                     self.createdHouseholdID = newID // 履歴にも保存
@@ -267,7 +274,7 @@ struct FamilySharingView: View {
             } catch {
                 DispatchQueue.main.async {
                     self.isMigrating = false
-                    self.errorMessage = "データの移行に失敗しました。\n\(error.localizedDescription)"
+                    self.errorMessage = "ログインまたはデータの移行に失敗しました。\n\(error.localizedDescription)"
                     self.showingErrorAlert = true
                 }
             }

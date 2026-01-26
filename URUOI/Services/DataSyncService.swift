@@ -159,6 +159,12 @@ final class DataSyncService {
                 let containerDescriptor = FetchDescriptor<ContainerMaster>(predicate: #Predicate { $0.id == containerUUID })
                 let container = try? context.fetch(containerDescriptor).first
                 
+                // コンテナが存在しない場合はスキップ（後で再同期される）
+                guard let container = container else {
+                    print("⚠️ コンテナID \(containerUUID) が見つかりません。レコード \(uuid) の同期をスキップします。")
+                    continue
+                }
+                
                 // レコードを探す
                 let descriptor = FetchDescriptor<WaterRecord>(predicate: #Predicate { $0.id == uuid })
                 
