@@ -256,6 +256,10 @@ struct FamilySharingView: View {
                 DispatchQueue.main.async {
                     self.householdID = newID
                     self.createdHouseholdID = newID // 履歴にも保存
+                    
+                    // Force Sync Start
+                    DataSyncService.shared.startSync(householdID: newID, modelContext: self.modelContext)
+                    
                     self.isMigrating = false
                     self.successMessage = "共有用IDを作成しました！\nまずは古いデータがクラウドにコピーされました。"
                     self.showingSuccessAlert = true
@@ -287,6 +291,10 @@ struct FamilySharingView: View {
                 // 2. IDを設定（これによりContentViewで同期が開始される）
                 DispatchQueue.main.async {
                     self.householdID = targetID
+                    
+                    // Force Sync Start
+                    DataSyncService.shared.startSync(householdID: targetID, modelContext: self.modelContext)
+                    
                     self.isMigrating = false
                     
                     if targetID == self.createdHouseholdID {

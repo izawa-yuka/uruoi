@@ -14,6 +14,8 @@ struct HistoryView: View {
         sort: \WaterRecord.startTime,
         order: .reverse
     ) private var records: [WaterRecord]
+    // ContainerMasterの変更を検知してViewを更新するためのクエリ
+    @Query private var containers: [ContainerMaster]
     @State private var viewModel = HistoryViewModel()
     @State private var recordViewModel = RecordViewModel()
     

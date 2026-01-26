@@ -4,6 +4,21 @@ import SwiftUI
 
 @Observable
 final class RecordViewModel {
+    // MARK: - Sync Helpers
+    private func getHouseholdID() -> String? {
+        return UserDefaults.standard.string(forKey: "householdID")
+    }
+    
+    private func syncRecord(_ record: WaterRecord) {
+        guard let householdID = getHouseholdID(), !householdID.isEmpty else { return }
+        DataSyncService.shared.saveRecord(record, householdID: householdID)
+    }
+    
+    private func syncDeleteRecord(id: UUID) {
+        guard let householdID = getHouseholdID(), !householdID.isEmpty else { return }
+        DataSyncService.shared.deleteRecord(id: id, householdID: householdID)
+    }
+
     // アラート関連
     var isAlert: Bool = false
     var alertMessage: String = ""
@@ -62,6 +77,11 @@ final class RecordViewModel {
         
         do {
             try modelContext.save()
+            
+            // Sync
+            if let householdID = getHouseholdID(), !householdID.isEmpty {
+                DataSyncService.shared.saveContainer(container, householdID: householdID)
+            }
         } catch {
             setError("器の情報の更新に失敗しました", error: error)
         }
@@ -109,6 +129,9 @@ final class RecordViewModel {
             try modelContext.save()
             refreshActiveRecords(using: modelContext)
             checkHealthAlert(using: modelContext)
+            
+            // Sync
+            syncRecord(newRecord)
         } catch {
             setError("記録の開始に失敗しました", error: error)
         }
@@ -163,6 +186,9 @@ final class RecordViewModel {
                 calculateWeeklyAverage(using: modelContext)
                 calculateTodayTotalPerCat(using: modelContext)
                 checkHealthAlert(using: modelContext)
+                
+                // Sync
+                syncRecord(currentRecord)
             }
         } catch {
             setError("記録の終了に失敗しました", error: error)
@@ -222,6 +248,9 @@ final class RecordViewModel {
             currentRecord.endWeight = currentRecord.startWeight
             
             NotificationManager.shared.cancelReminder(containerID: container.id)
+            
+            // Sync
+            syncRecord(currentRecord)
         }
     }
     
@@ -242,7 +271,11 @@ final class RecordViewModel {
             refreshActiveRecords(using: modelContext)
             checkHealthAlert(using: modelContext)
             calculateWeeklyAverage(using: modelContext)
+            calculateWeeklyAverage(using: modelContext)
             calculateTodayTotalPerCat(using: modelContext)
+            
+            // Sync
+            syncRecord(record)
         } catch {
             setError("記録の更新に失敗しました", error: error)
         }
@@ -277,6 +310,9 @@ final class RecordViewModel {
             checkHealthAlert(using: modelContext)
             calculateWeeklyAverage(using: modelContext)
             calculateTodayTotalPerCat(using: modelContext)
+            
+            // Sync
+            syncRecord(record)
         } catch {
             setError("記録の更新に失敗しました", error: error)
         }
@@ -284,6 +320,7 @@ final class RecordViewModel {
     
     // MARK: - レコード削除
     func deleteRecord(_ record: WaterRecord, modelContext: ModelContext) {
+        let recordID = record.id // 削除前にIDを保持
         if record.endTime == nil, let container = record.container {
              NotificationManager.shared.cancelReminder(containerID: container.id)
         }
@@ -296,6 +333,9 @@ final class RecordViewModel {
             checkHealthAlert(using: modelContext)
             calculateWeeklyAverage(using: modelContext)
             calculateTodayTotalPerCat(using: modelContext)
+            
+            // Sync
+            syncDeleteRecord(id: recordID)
         } catch {
             setError("記録の削除に失敗しました", error: error)
         }

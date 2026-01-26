@@ -14,20 +14,41 @@ final class SettingsViewModel {
     var lastError: String?
     var showError: Bool = false
     
+    // MARK: - Sync Helpers
+    private func getHouseholdID() -> String? {
+        return UserDefaults.standard.string(forKey: "householdID")
+    }
+    
     func addContainer(name: String, emptyWeight: Double, modelContext: ModelContext) {
         let newContainer = ContainerMaster(name: name, emptyWeight: emptyWeight)
         modelContext.insert(newContainer)
         try? modelContext.save()
+        
+        // Sync
+        if let householdID = getHouseholdID(), !householdID.isEmpty {
+            DataSyncService.shared.saveContainer(newContainer, householdID: householdID)
+        }
     }
     
     func deleteContainer(_ container: ContainerMaster, modelContext: ModelContext) {
         container.isArchived = true
         try? modelContext.save()
+        
+        // Sync (Update)
+        if let householdID = getHouseholdID(), !householdID.isEmpty {
+            DataSyncService.shared.saveContainer(container, householdID: householdID)
+        }
     }
     
     func hardDeleteContainer(_ container: ContainerMaster, modelContext: ModelContext) {
+        let containerID = container.id // 削除前にID確保
         modelContext.delete(container)
         try? modelContext.save()
+        
+        // Sync (Delete)
+        if let householdID = getHouseholdID(), !householdID.isEmpty {
+            DataSyncService.shared.deleteContainer(id: containerID, householdID: householdID)
+        }
     }
     
     private func setError(_ message: String, error: Error? = nil) {

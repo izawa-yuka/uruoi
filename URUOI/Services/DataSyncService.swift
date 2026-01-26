@@ -208,4 +208,59 @@ final class DataSyncService {
         
         try? context.save()
     }
+
+    // MARK: - Sending Methods (Local -> Cloud)
+    
+    /// 器をクラウドへ保存（作成・更新）
+    /// - Parameters:
+    ///   - container: 対象の器
+    ///   - householdID: 共有ID
+    func saveContainer(_ container: ContainerMaster, householdID: String) {
+        let firestoreContainer = FirestoreContainer(from: container)
+        let ref = db.collection("households").document(householdID)
+            .collection("containers").document(firestoreContainer.id)
+        
+        do {
+            try ref.setData(from: firestoreContainer)
+        } catch {
+            print("❌ 器の保存に失敗: \(error.localizedDescription)")
+        }
+    }
+    
+    /// 器をクラウドから削除
+    func deleteContainer(id: UUID, householdID: String) {
+        let ref = db.collection("households").document(householdID)
+            .collection("containers").document(id.uuidString)
+        
+        ref.delete { error in
+            if let error = error {
+                print("❌ 器の削除に失敗: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    /// 記録をクラウドへ保存（作成・更新）
+    func saveRecord(_ record: WaterRecord, householdID: String) {
+        let firestoreRecord = FirestoreRecord(from: record)
+        let ref = db.collection("households").document(householdID)
+            .collection("records").document(firestoreRecord.id)
+        
+        do {
+            try ref.setData(from: firestoreRecord)
+        } catch {
+            print("❌ 記録の保存に失敗: \(error.localizedDescription)")
+        }
+    }
+    
+    /// 記録をクラウドから削除
+    func deleteRecord(id: UUID, householdID: String) {
+        let ref = db.collection("households").document(householdID)
+            .collection("records").document(id.uuidString)
+        
+        ref.delete { error in
+            if let error = error {
+                print("❌ 記録の削除に失敗: \(error.localizedDescription)")
+            }
+        }
+    }
 }
