@@ -533,6 +533,11 @@ struct ContainerTimelineRow: View {
     private var record: WaterRecord? { let id = item.recordID; return modelContext.model(for: id) as? WaterRecord }
     private var isAbnormal: Bool { guard let r = record else { return false }; return viewModel.isRecordAbnormal(r, modelContext: modelContext) }
     
+    private var isRecording: Bool {
+        guard let r = record else { return false }
+        return r.endTime == nil
+    }
+    
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             Text(historyViewModel.formatTime(item.date)).font(.subheadline).foregroundColor(.secondary).frame(width: 50, alignment: .leading).monospacedDigit()
@@ -553,5 +558,9 @@ struct ContainerTimelineRow: View {
         }
         // ▼▼▼ 修正: commonShadow -> cardShadow ▼▼▼
         .padding().background(Color.white).cornerRadius(.cardCornerRadius).cardShadow()
+        .overlay(
+            RoundedRectangle(cornerRadius: .cardCornerRadius)
+                .stroke(isRecording ? Color.appMain : Color.clear, lineWidth: 2)
+        )
     }
 }

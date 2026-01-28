@@ -9,7 +9,7 @@ struct SettingsView: View {
     
     // アラート設定
     @AppStorage("isWaterAlertEnabled") private var isWaterAlertEnabled: Bool = true
-    @AppStorage("waterAlertInterval") private var waterAlertInterval: Int = 1
+    @AppStorage("waterReminderDays") private var waterReminderDays: Int = 1 // キーを修正: waterAlertInterval -> waterReminderDays
     @AppStorage("isHealthAlertEnabled") private var isHealthAlertEnabled: Bool = true
     @AppStorage("healthAlertThreshold") private var healthAlertThreshold: Int = 200
     
@@ -56,7 +56,7 @@ struct SettingsView: View {
                             .tint(.blue)
                         
                         if isWaterAlertEnabled {
-                            Stepper("通知間隔: \(waterAlertInterval) 日", value: $waterAlertInterval, in: 1...30)
+                            Stepper("通知間隔: \(waterReminderDays) 日", value: $waterReminderDays, in: 1...30)
                         }
                     } else {
                         Button {

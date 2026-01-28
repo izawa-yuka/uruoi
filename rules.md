@@ -1,49 +1,117 @@
 # Project: URUOI (Cat's Water Recording App)
 
-## 1. Technology Stack
-- **Language**: Swift 5.9+
-- **Framework**: SwiftUI
-- **Database**: SwiftData
-- **Architecture**: MVVM (Model-View-ViewModel)
-- **Target**: iOS 17.0+
+  
 
-## 2. Coding Guidelines
-- **SwiftUI First**: Use declarative syntax. Avoid UIKit unless absolutely necessary.
-- **SwiftData**: Use `@Model`, `@Query`, and `modelContext` for data persistence.
-- **Safe Coding**: Always handle optionals safely (use `if let` or `guard let`, avoid force unwrapping `!`).
-- **Clean Code**: Keep Views small. Move logic to ViewModels.
+## 0. 基本方針 (Basic Policy) [重要]
 
-## 3. UI/UX Design Philosophy (OOUI)
-- **Object-Oriented UI**: Design based on "Objects" (Containers), not "Tasks".
-- **Interaction**:
-  - Main Screen: List of Containers (Cards).
-  - Detail Screen: History and Actions (Start/Finish) for that specific Container.
-- **Multiple Active Records**: Allow multiple containers to be active (recording) simultaneously.
+- **言語設定**: 特に指示がない限り、すべての会話と回答を**日本語**で行ってください。
 
-## 4. User Persona & Communication Style
-- **User**: Freelance Web Designer (Non-engineer).
-- **Tone**: Empathetic, insightful, clear, and transparent.
-- **Explanation**: Avoid technical jargon. Explain *why* a change is needed, not just *what* changed.
-- **Language**: Japanese (日本語).
+- **ドキュメントの言語**: 以下のドキュメントを作成・更新する際も、必ず**日本語**で作成してください。
 
-## 5. Agent Behavior & Workflow (New!)
-This section defines how the AI agent should handle requests and background tasks.
+- 実装計画 (Implementation Plan)
 
-**Protocol for Complex Tasks:**
-"Can you spin off an async background agent to do this and then periodically poll it as it does work and summarize what is happening."
+- 修正内容の確認 (Walkthrough)
 
-**Explanation & Education:**
-"I'm not technical at all so please summarize it in a simple way for me. Use the explore agent to summarize how things work (that the other agent is working on) so I can learn while I do this."
+- タスクリスト (Task List)
 
-**Error Handling:**
-"If the background agent runs into any errors, please stop and tell me but guide me in how I might be able to fix it."
+- **非エンジニア向けの配慮**:
 
-**Constraints:**
-"Remember I am non technical, so any technical language at all is not useful to me."
+- 専門用語（"インスタンス化", "DI", "デリゲート"など）は避け、日常的な言葉や例えを使って説明してください。
 
----
+- 「何をしたか（What）」だけでなく、「なぜそうしたのか（Why）」と「ユーザーにとってどう変わるか」を重点的に説明してください。
 
-## 6. Specific Implementation Details (Memory)
-- **RecordViewModel**: Manages `activeRecords` (Array) instead of single `latestRecord`.
-- **Alert Logic**: Compares "Today's Total" vs "Past Average".
-- **Pro Features**: Check `StoreManager.shared.isProMember` for limits (e.g., max 5 containers).
+  
+
+## 1. エージェントの行動指針 (Agent Behavior & Workflow)
+
+複雑なタスクや背景知識の共有については、以下のプロトコルに従ってください。
+
+  
+
+- **非同期エージェントの活用**:
+
+「裏側で作業を進めておいて」といった依頼（"spin off an async background agent..."）があった場合は、メインの対話をブロックせずに作業を進め、定期的に進捗を要約して報告してください。
+
+- **学習と要約**:
+
+「仕組みを教えて（summarize how things work）」と聞かれた際は、Explore Agent（検索機能）などを活用して情報を整理し、非エンジニアにもわかるように噛み砕いて説明してください。
+
+- **エラーハンドリング**:
+
+バックグラウンド作業でエラーが発生した場合は、すぐに停止して報告してください。その際、単にエラーログを見せるのではなく、「何が起きたか」と「どうすれば直せるか（ガイド）」を平易な言葉で提案してください。
+
+  
+
+## 2. ユーザーペルソナ (User Persona)
+
+- **ターゲット**: フリーランスのWebデザイナー（エンジニアではありません）。
+
+- **トーン**: 共感的、洞察力があり、透明性が高く、親しみやすいトーン。
+
+- **コミュニケーション**: 結論から先に述べ、その後に理由を説明する。
+
+  
+
+## 3. テクノロジースタック (Technology Stack)
+
+現在のプロジェクト構成に従ってください。
+
+- **言語**: Swift 5.9+
+
+- **フレームワーク**: SwiftUI
+
+- **データベース**: SwiftData (`@Model`, `@Query` を使用)
+
+- **アーキテクチャ**: MVVM (Model-View-ViewModel)
+
+- **ターゲット**: iOS 17.0+
+
+  
+
+## 4. コーディングガイドライン (Coding Guidelines)
+
+- **SwiftUI First**: 基本的にSwiftUIを使用し、UIKitは必要な場合のみ限定的に使用する。
+
+- **SwiftData**: データの永続化にはCore DataではなくSwiftDataを使用する。
+
+- **安全な実装**: クラッシュを防ぐため、Optional型は `if let` や `guard let` で安全にアンラップする（`!` による強制アンラップは禁止）。
+
+- **コードの整理**: View（見た目）は小さく保ち、ロジックはViewModelに移動させる。
+
+- **共通化**: デザインに関わる共通パーツ（影、角丸など）は `View+Extensions.swift` で管理する。
+
+  
+
+## 5. UI/UX デザイン哲学 (OOUI)
+
+- **オブジェクト指向UI**: 「タスク（やること）」ではなく「オブジェクト（モノ）」を起点に設計する。
+
+- **メイン画面**: 器（Container）のリストカードを表示。
+
+- **詳細画面**: その器の履歴やアクション（設置/回収）を集約。
+
+- **複数の記録**: 複数の器で同時に「記録中（設置中）」の状態になることを許容する。
+
+  
+
+## 6. 現在の実装仕様 (Implementation Details)
+
+- **データ構造**:
+
+- `ContainerMaster`: 器のマスターデータ。
+
+- `WaterRecord`: 記録データ（`startTime`でソート）。
+
+- **ViewModelの役割**:
+
+- `RecordViewModel`: 記録の開始・終了、アラート判定、集計を担当。
+
+- `HistoryViewModel`: 履歴データの取得、グラフ用データの加工を担当。
+
+- **アラートロジック**:
+
+- 「今回の記録量」が「過去の平均」と大きく乖離している場合に健康アラートを出す。
+
+- **Pro機能**:
+
+- `StoreManager.isProMember` で判定。無料版は器の登録数などに制限（例: 最大5つ）を設ける。

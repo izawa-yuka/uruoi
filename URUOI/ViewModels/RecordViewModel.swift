@@ -360,6 +360,50 @@ final class RecordViewModel {
         return activeRecords.contains { $0.containerID == container.id }
     }
     
+    // MARK: - 水質アラート（色判定）
+    func getWaterStatusColor(for container: ContainerMaster) -> Color {
+        // アクティブなレコードを取得
+        guard let record = activeRecords.first(where: { $0.containerID == container.id }) else {
+            return .gray // 非アクティブ
+        }
+        
+        let settings = AppSettings.shared
+        
+        // アラートが無効、またはProメンバーでない場合は常にFresh
+        if !settings.isProMember || !settings.isWaterAlertEnabled {
+            return .appMain
+        }
+        
+        let days = settings.waterReminderDays
+        // 設定日数が0以下の場合は、期限ロジック無効（常にFresh）
+        if days <= 0 { return .appMain }
+        
+        // 1. 期限（Deadline）の計算: startTime + alertInterval
+        let calendar = Calendar.current
+        guard let deadline = calendar.date(byAdding: .day, value: days, to: record.startTime) else {
+            return .appMain
+        }
+        
+        // 2. 残り時間の計算: Deadline - CurrentTime
+        let remainingSeconds = deadline.timeIntervalSince(Date())
+        let remainingHours = remainingSeconds / 3600.0
+        
+        // 3. 判定ロジック
+        if remainingHours <= 3 {
+             // 交換 (Urgent): 3時間以下 (および期限切れ)
+             // ピンク: F15BB5
+            return .statusUrgent
+        } else if remainingHours < 12 {
+            // 予備軍 (Notice): 12時間未満 〜 3時間前に到達
+            // ラベンダー: 9B5DE5
+            return .statusNotice
+        } else {
+            // 通常 (Fresh): 12時間以上ある
+            // 青: Color.appMain
+            return .appMain
+        }
+    }
+    
     func getElapsedTime(for container: ContainerMaster, modelContext: ModelContext) -> String? {
         guard let record = activeRecords.first(where: { $0.containerID == container.id }) else {
             return nil
@@ -579,7 +623,7 @@ final class RecordViewModel {
         }
     }
     
-    private func triggerUIUpdate() {
+    func triggerUIUpdate() {
         lastUpdateTimestamp = Date()
     }
 }

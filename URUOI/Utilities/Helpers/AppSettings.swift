@@ -24,7 +24,11 @@ final class AppSettings {
     
     // 【重要】ここが追加されている必要があります
     @ObservationIgnored
-    @AppStorage("waterReminderDays") var waterReminderDays: Int = 0
+    @ObservationIgnored
+    @AppStorage("waterReminderDays") var waterReminderDays: Int = 1
+    
+    @ObservationIgnored
+    @AppStorage("isWaterAlertEnabled") var isWaterAlertEnabled: Bool = true
     
     private init() {}
 }

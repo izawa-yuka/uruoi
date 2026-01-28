@@ -10,6 +10,7 @@ import SwiftData
 
 struct RecordView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.scenePhase) private var scenePhase
     @State private var viewModel = RecordViewModel()
     @Query(filter: #Predicate<ContainerMaster> { !$0.isArchived }, sort: [SortDescriptor(\ContainerMaster.sortOrder), SortDescriptor(\ContainerMaster.createdAt)]) private var containers: [ContainerMaster]
     @Query(sort: \WaterRecord.startTime) private var allRecords: [WaterRecord]
@@ -137,6 +138,7 @@ struct RecordView: View {
                 viewModel.setModelContext(modelContext)
                 viewModel.checkHealthAlert(using: modelContext)
                 viewModel.calculateWeeklyAverage(using: modelContext)
+                viewModel.triggerUIUpdate()
             }
             .onChange(of: allRecords) { _, _ in
                 viewModel.refreshActiveRecords(using: modelContext)
@@ -145,6 +147,11 @@ struct RecordView: View {
             }
             .onChange(of: viewModel.lastUpdateTimestamp) { _, _ in
                 viewModel.checkHealthAlert(using: modelContext)
+            }
+            .onChange(of: scenePhase) { _, newPhase in
+                if newPhase == .active {
+                    viewModel.triggerUIUpdate()
+                }
             }
         }
     }
@@ -160,15 +167,18 @@ struct ContainerCard: View {
     let onTap: () -> Void
     
     var body: some View {
+        // 色判定: アクティブならViewModelから取得、そうでなければグレー
+        let statusColor = isActive ? viewModel.getWaterStatusColor(for: container) : Color.gray
+        
         Button {
             onTap()
         } label: {
             HStack(spacing: 16) {
                 Image(systemName: "drop.fill")
-                    .foregroundColor(isActive ? Color.appMain : Color.gray)
+                    .foregroundColor(statusColor)
                     .font(.system(size: 32))
                     .frame(width: 48, height: 48)
-                    .background(isActive ? Color.appMain.opacity(0.1) : Color.gray.opacity(0.1))
+                    .background(statusColor.opacity(0.1))
                     .clipShape(Circle())
                 
                 VStack(alignment: .leading, spacing: 4) {
@@ -285,6 +295,6 @@ struct ReorderContainersSheet: View {
 // MARK: - Common Shadow Extension (Renamed)
 extension View {
     func cardShadow() -> some View {
-        self.shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 4)
+        self.shadow(color: Color.black.opacity(0.07), radius: 10, x: 1, y: 4)
     }
 }

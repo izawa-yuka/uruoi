@@ -53,5 +53,12 @@ extension Color {
     
     /// 非活性ボタン背景カラー
     static let disabledButtonBackground = Color(hex: "ECECEC")
+    
+    // MARK: - Water Status Colors
+    /// 交換予備軍（Warning）: 残り12時間未満〜3時間
+    static let statusNotice = Color(hex: "6A94B8")
+    
+    /// 交換推奨（Expired）: 残り3時間以下
+    static let statusUrgent = Color(hex: "5B6A76")
 }
 
