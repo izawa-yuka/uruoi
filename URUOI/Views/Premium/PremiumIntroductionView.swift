@@ -74,6 +74,12 @@ struct PremiumIntroductionView: View {
                     // 【修正】alignment: .leading を追加してアイコンを左揃えに
                     VStack(alignment: .leading, spacing: 24) {
                         FeatureRow(
+                            icon: "person.2.circle.fill",
+                            title: "家族共有機能",
+                            description: "リアルタイムで記録を同期。「あれ？お水かえたっけ？」の心配がなくなります。"
+                        )
+                        
+                        FeatureRow(
                             icon: "chart.bar.fill",
                             title: "分析グラフの閲覧",
                             description: "健康管理の要"
@@ -240,13 +246,12 @@ struct PlanCard: View {
                 // バッジを右上に配置（年間プランのみ）
                 if let badge = planType.badge {
                     Text(badge)
-                        .font(.caption)
-                        .fontWeight(.bold)
+                        .font(.system(size: 13, weight: .bold))
                         .foregroundColor(.white)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .background(Color.appMain)
-                        .cornerRadius(8)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color(hex: "FF812D"))
+                        .clipShape(Capsule())
                         .offset(x: -12, y: -8)
                 }
             }

@@ -40,11 +40,28 @@ struct SettingsView: View {
                 
                 // MARK: - 家族共有設定
                 Section(header: Text("データ共有"), footer: Text("記録を家族と共有することができます。")) {
-                    NavigationLink(destination: FamilySharingView()) {
-                        HStack {
-                            Image(systemName: "house.fill")
-                                .foregroundStyle(.blue)
-                            Text("家族共有（ベータ版）")
+                    if isProMember {
+                        NavigationLink(destination: FamilySharingView()) {
+                            HStack {
+                                Image(systemName: "house.fill")
+                                    .foregroundStyle(.blue)
+                                Text("家族共有（ベータ版）")
+                            }
+                        }
+                    } else {
+                        Button {
+                            showingPremiumIntro = true
+                        } label: {
+                            HStack {
+                                Image(systemName: "house.fill")
+                                    .foregroundStyle(.blue)
+                                Text("家族共有（ベータ版）")
+                                    .foregroundStyle(.primary)
+                                Spacer()
+                                Image(systemName: "lock.fill")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                     }
                 }
