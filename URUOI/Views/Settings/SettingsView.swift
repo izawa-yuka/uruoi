@@ -14,6 +14,11 @@ struct SettingsView: View {
     @AppStorage("healthAlertThreshold") private var healthAlertThreshold: Int = 200
     
     @State private var showingPremiumIntro = false
+    @Environment(\.modelContext) private var modelContext
+    #if DEBUG
+    @State private var showingDebugAlert = false
+    @State private var showingPermissionAlert = false
+    #endif
     
     var body: some View {
         NavigationStack {
@@ -102,9 +107,10 @@ struct SettingsView: View {
                 
                 // MARK: - サポート
                 Section("サポート") {
-                    Link("よくある質問", destination: URL(string: "https://alive-galliform-e53.notion.site/URUOI-2decf0f2e6aa80859cb6d4dcb00c6738?source=copy_link")!)
-                    Link("プライバシーポリシー", destination: URL(string: "https://alive-galliform-e53.notion.site/2e0cf0f2e6aa807a91cae7e207684724?source=copy_link")!)
-                    Link("お問い合わせ・フィードバック", destination: URL(string: "https://docs.google.com/forms/d/e/1FAIpQLSe0Xdk_P7sMJupxluDGtE-YrroVIKzi3DHetZ65MTQ8KzWS6A/viewform?usp=dialog")!)
+                    Link("よくある質問", destination: AppConfig.faqURL)
+                    Link("利用規約", destination: AppConfig.termsURL)
+                    Link("プライバシーポリシー", destination: AppConfig.privacyPolicyURL)
+                    Link("お問い合わせ・フィードバック", destination: AppConfig.supportURL)
                 }
                 
                 // MARK: - アプリ情報
@@ -117,21 +123,99 @@ struct SettingsView: View {
                     }
                 }
                 
-                // MARK: - 🧪 テスト用メニュー
-                Section(header: Text("🧪 テスト用メニュー")) {
-                    Toggle("【デバッグ】プレミアムプラン有効化", isOn: $isProMember)
-                        .tint(.orange)
-                    Text("※このスイッチはテスト版でのみ表示されます")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                // MARK: - 📸 スクリーンショット用 (DEBUGのみ)
+                #if DEBUG
+                Section(header: Text("📸 スクリーンショット用")) {
+                    Button("スクショ用データを生成") {
+                        showingDebugAlert = true
+                    }
+                    .foregroundColor(.blue)
                 }
+                
+                Section(header: Text("🔔 通知デバッグ")) {
+                    Button("権限ステータス確認") {
+                        NotificationManager.shared.debugCheckPermission()
+                    }
+                    
+                    Button("待機中の通知リストを出力") {
+                        NotificationManager.shared.debugListPendingNotifications()
+                    }
+                    
+                    // 確実に動くようにタスクとログを明示的に書く
+                    Button("5秒後にテスト通知") {
+                        Task {
+                            print("🟢 [Debug] ボタンがタップされました")
+                            let center = UNUserNotificationCenter.current()
+                            
+                            // 1. 権限確認
+                            var settings = await center.notificationSettings()
+                            print("🟢 [Debug] 権限状態(初期): \(settings.authorizationStatus.rawValue)")
+                            
+                            // 未決定の場合はリクエストする
+                            if settings.authorizationStatus == .notDetermined {
+                                print("🟡 [Debug] 権限をリクエストします...")
+                                do {
+                                    let granted = try await center.requestAuthorization(options: [.alert, .sound, .badge])
+                                    print("🟢 [Debug] 権限リクエスト結果: \(granted)")
+                                    // 設定を再取得
+                                    settings = await center.notificationSettings()
+                                } catch {
+                                    print("🔴 [Debug] 権限リクエストエラー: \(error)")
+                                }
+                            }
+                            
+                            // 許可されていない場合
+                            guard settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional else {
+                                print("🔴 [Debug] 権限がありません (Status: \(settings.authorizationStatus.rawValue))")
+                                await MainActor.run {
+                                    showingPermissionAlert = true
+                                }
+                                return
+                            }
+                            
+                            // 2. コンテンツ作成
+                            let content = UNMutableNotificationContent()
+                            content.title = "🔔 デバッグ通知"
+                            content.body = "これは5秒後のテスト通知です"
+                            content.sound = .default
+                            
+                            // 3. トリガー作成
+                            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)
+                            let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+                            
+                            // 4. 登録
+                            do {
+                                try await center.add(request)
+                                print("🟢 [Debug] 通知リクエストを登録しました（5秒後）")
+                            } catch {
+                                print("🔴 [Debug] 通知登録エラー: \(error)")
+                            }
+                        }
+                    }
+                    .foregroundColor(.green)
+                }
+                #endif
             }
             .navigationTitle("設定")
             .navigationBarTitleDisplayMode(.inline)
-            // 以前ここにあった .toolbar ブロックを削除しました
             .sheet(isPresented: $showingPremiumIntro) {
                 PremiumIntroductionView()
             }
+            #if DEBUG
+            .alert("データの生成", isPresented: $showingDebugAlert) {
+                Button("キャンセル", role: .cancel) { }
+                Button("生成する", role: .destructive) {
+                    DebugDataManager.injectSampleData(context: modelContext)
+                }
+            } message: {
+                Text("既存のデータはすべて削除され、ダミーデータに置き換わります。よろしいですか？")
+            }
+            .alert("通知が無効です", isPresented: $showingPermissionAlert) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("設定アプリから通知を許可してください。")
+            }
+            #endif
         }
     }
 }

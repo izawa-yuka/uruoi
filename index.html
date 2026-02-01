@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URUOI - 愛猫の水分補給・健康管理アプリ</title>
+    <style>
+        :root {
+            --bg-color: #f5f5f7;
+            --text-color: #1d1d1f;
+            --link-color: #156EBA; /* URUOIメインカラー */
+            --button-bg: #156EBA;
+            --button-text: #ffffff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 60px 40px;
+            border-radius: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            max-width: 480px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .app-icon {
+            width: 120px;
+            height: 120px;
+            background-color: #E8F1F9; /* 薄い青 */
+            border-radius: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(21, 110, 186, 0.2);
+            object-fit: cover;
+        }
+
+        h1 { margin: 0 0 16px 0; font-size: 32px; font-weight: 700; color: #333; }
+        
+        p.description { 
+            font-size: 16px; 
+            line-height: 1.8; 
+            color: #6e6e6e; 
+            margin-bottom: 40px; 
+        }
+
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--button-bg);
+            color: var(--button-text);
+            text-decoration: none;
+            padding: 14px 28px;
+            border-radius: 99px;
+            font-weight: 600;
+            transition: opacity 0.2s;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(21, 110, 186, 0.3);
+        }
+
+        .download-btn:hover { opacity: 0.9; }
+
+        .links {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .text-link {
+            color: var(--link-color);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .text-link:hover { text-decoration: underline; }
+
+        footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 12px;
+            color: #86868b;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <img src="icon.png" alt="URUOI Icon" class="app-icon" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiBmaWxsPSIjMTU2RUJBIj48cGF0aCBkPSJNMjU2IDUxMmMxMTQuOTUgMCAyMDgtOTMuMDUgMjA4LTIwOEM0NjQgMTg5LjAzIDI1NiAwIDI1NiAwUzQ4IDE4OS4wMyA0OCAzMDRjMCAxMTQuOTUgOTMuMDUgMjA4IDIwOCAyMDh6Ii8+PC9zdmc+'">
+
+        <h1>URUOI</h1>
+        <p class="description">
+            「あれ？お水変えたっけ？」をなくす、<br>
+            愛猫のための水分管理アプリ。<br>
+            家族とのリアルタイム共有機能で、<br>
+            みんなで猫ちゃんの健康を見守れます。
+        </p>
+
+        <a href="#" class="download-btn" target="_blank">App Storeで見る</a>
+
+        <div class="links">
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSe0Xdk_P7sMJupxluDGtE-YrroVIKzi3DHetZ65MTQ8KzWS6A/viewform?usp=header" class="text-link" target="_blank">
+                サポート / お問い合わせ
+            </a>
+            <a href="terms.html" class="text-link">利用規約</a>
+            <a href="privacy.html" class="text-link">プライバシーポリシー</a>
+        </div>
+
+        <footer>
+            &copy; 2026 Hebereke Komachi. All rights reserved.
+        </footer>
+    </div>
+
+</body>
+</html>

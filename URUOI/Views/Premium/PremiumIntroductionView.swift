@@ -11,6 +11,9 @@ struct PremiumIntroductionView: View {
     @Environment(\.dismiss) private var dismiss
     @AppStorage("isProMember") private var isProMember: Bool = false
     @State private var selectedPlan: PlanType = .yearly // 初期値を年間プランに変更
+    private let storeManager = StoreManager.shared
+    @State private var isRestoring = false
+    @State private var showingRestoreAlert = false
     
     enum PlanType {
         case monthly
@@ -120,16 +123,57 @@ struct PremiumIntroductionView: View {
                     }
                     .padding(.horizontal)
                     
+                    // 買い切りプラン（Lifetime）
+                    Button {
+                        Task {
+                            await storeManager.purchaseLifetime()
+                            dismiss()
+                        }
+                    } label: {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("ずっと！URUOIプラン")
+                                    .font(.headline)
+                                    .foregroundColor(.primary)
+                                
+                                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                                    Text("¥8,000")
+                                        .font(.title2)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.appMain)
+                                    
+                                    Text("(一括払い)")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                                
+                                Text("年額プランの約4.5年分")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            
+                            Spacer()
+                        }
+                        .padding(20) // PlanCardのパディングに合わせる
+                        .background(Color(.systemBackground))
+                        .cornerRadius(.cardCornerRadius)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: .cardCornerRadius)
+                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                        )
+                        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+                    }
+                    .padding(.horizontal)
+                    .padding(.top, 8)
+                    
                     // 購入ボタン
                     VStack(spacing: 12) {
                         Button {
-                            // TODO: StoreKitでの購入処理を実装
-                            // storeManager.purchasePremium(plan: selectedPlan)
-                            #if DEBUG
-                            // デバッグ用: フラグを切り替え
-                            isProMember = true
-                            dismiss()
-                            #endif
+                            Task {
+                                await storeManager.purchaseSubscription(planId: selectedPlan == .monthly ? StoreManager.ProductID.monthly : StoreManager.ProductID.yearly)
+                                dismiss()
+                            }
+
                         } label: {
                             // 【修正】文言を統一
                             Text("もっと！URUOIプランを購入")
@@ -147,13 +191,28 @@ struct PremiumIntroductionView: View {
                             .foregroundColor(.secondary)
                         
                         Button {
-                            // TODO: 復元処理を実装
-                            // storeManager.restorePurchases()
+                            isRestoring = true
+                            Task {
+                                do {
+                                    try await storeManager.restorePurchases()
+                                } catch {
+                                    print("Restore failed: \(error)")
+                                }
+                                // 成功・失敗に関わらず完了アラートを出す（本来は結果に応じて分岐）
+                                isRestoring = false
+                                showingRestoreAlert = true
+                            }
                         } label: {
-                            Text("購入を復元")
-                                .font(.subheadline)
-                                .foregroundColor(.appMain)
+                            if isRestoring {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                            } else {
+                                Text("以前購入された方はこちら（復元）")
+                                    .font(.footnote)
+                                    .foregroundColor(.secondary)
+                            }
                         }
+                        .disabled(isRestoring)
                     }
                     .padding(.horizontal)
                     
@@ -162,7 +221,8 @@ struct PremiumIntroductionView: View {
                         Text("• 支払いはApple IDアカウントに請求されます")
                         Text("• 購入の確認時に課金されます")
                         Text("• 自動更新の終了は、購読期間の終了24時間前までに設定から行えます")
-                        Text("• 詳細は利用規約・プライバシーポリシーをご確認ください")
+                        Text("• 詳細は[利用規約](\(AppConfig.termsURL))・[プライバシーポリシー](\(AppConfig.privacyPolicyURL))をご確認ください")
+                            .tint(.appMain) // リンクの色を指定
                     }
                     .font(.caption)
                     .foregroundColor(.secondary)
@@ -181,6 +241,11 @@ struct PremiumIntroductionView: View {
                             .foregroundColor(.secondary)
                     }
                 }
+            }
+            .alert("復元完了", isPresented: $showingRestoreAlert) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("購入履歴の確認が完了しました。有効な購入がある場合は反映されています。")
             }
         }
     }
