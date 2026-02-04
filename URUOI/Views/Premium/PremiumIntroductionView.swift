@@ -227,6 +227,15 @@ struct PremiumIntroductionView: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .padding(.horizontal)
+                    .padding(.bottom, 20)
+                    
+                    // 利用規約・プライバシーポリシー
+                    HStack(spacing: 24) {
+                        Link("利用規約", destination: AppConfig.termsURL)
+                        Link("プライバシーポリシー", destination: AppConfig.privacyPolicyURL)
+                    }
+                    .font(.caption)
+                    .foregroundColor(.gray)
                     .padding(.bottom, 40)
                 }
             }

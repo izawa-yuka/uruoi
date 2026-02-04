@@ -32,7 +32,7 @@ struct FamilySharingView: View {
             // MARK: - 説明セクション
             Section {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("家族共有機能（ベータ版）")
+                    Text("家族共有機能")
                         .font(.headline)
                     Text("「共有用ID」を使うことで、家族みんなで同じ記録を見ることができます。\n現在のデータはクラウドに安全にバックアップされます。")
                         .font(.subheadline)

@@ -50,7 +50,7 @@ struct SettingsView: View {
                             HStack {
                                 Image(systemName: "house.fill")
                                     .foregroundStyle(.blue)
-                                Text("家族共有（ベータ版）")
+                                Text("家族共有")
                             }
                         }
                     } else {
@@ -60,7 +60,7 @@ struct SettingsView: View {
                             HStack {
                                 Image(systemName: "house.fill")
                                     .foregroundStyle(.blue)
-                                Text("家族共有（ベータ版）")
+                                Text("家族共有")
                                     .foregroundStyle(.primary)
                                 Spacer()
                                 Image(systemName: "lock.fill")
