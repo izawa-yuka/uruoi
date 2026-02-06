@@ -11,7 +11,8 @@ struct SettingsView: View {
     @AppStorage("isWaterAlertEnabled") private var isWaterAlertEnabled: Bool = true
     @AppStorage("waterReminderDays") private var waterReminderDays: Int = 1 // キーを修正: waterAlertInterval -> waterReminderDays
     @AppStorage("isHealthAlertEnabled") private var isHealthAlertEnabled: Bool = true
-    @AppStorage("healthAlertThreshold") private var healthAlertThreshold: 
+    @AppStorage("healthAlertThreshold") private var healthAlertThreshold: Int = 200
+    
     @State private var showingPremiumIntro = false
     @Environment(\.modelContext) private var modelContext
     #if DEBUG
@@ -22,6 +23,43 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             List {
+                // MARK: - 会員ステータス
+                Section {
+                    HStack {
+                        switch StoreManager.shared.currentPlan {
+                        case .lifetime:
+                            Label {
+                                Text("ずっと！URUOIプラン（買い切り）")
+                                    .foregroundStyle(.primary)
+                                    .fontWeight(.bold)
+                            } icon: {
+                                Image(systemName: "crown.fill")
+                                    .foregroundStyle(.yellow)
+                            }
+                        case .monthly:
+                            Label {
+                                Text("もっと！URUOIプラン（月額）")
+                                    .foregroundStyle(.primary)
+                                    .fontWeight(.bold)
+                            } icon: {
+                                Image(systemName: "star.fill")
+                                    .foregroundStyle(.yellow)
+                            }
+                        case .yearly:
+                            Label {
+                                Text("もっと！URUOIプラン（年額）")
+                                    .foregroundStyle(.primary)
+                                    .fontWeight(.bold)
+                            } icon: {
+                                Image(systemName: "star.fill")
+                                    .foregroundStyle(.yellow)
+                            }
+                        case .free:
+                            Text("現在のプラン: 無料プラン")
+                        }
+                    }
+                }
+                
                 // MARK: - プレミアムプラン案内（未加入時のみ）
                 if !isProMember {
                     Section {
@@ -199,6 +237,9 @@ struct SettingsView: View {
             .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $showingPremiumIntro) {
                 PremiumIntroductionView()
+            }
+            .task {
+                await StoreManager.shared.updatePurchasedStatus()
             }
             #if DEBUG
             .alert("データの生成", isPresented: $showingDebugAlert) {

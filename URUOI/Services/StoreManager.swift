@@ -119,9 +119,21 @@ final class StoreManager {
         }
     }
     
+    enum PlanStatus {
+        case lifetime
+        case monthly
+        case yearly
+        case free
+    }
+    
+    var currentPlan: PlanStatus = .free
+
+    // ... (existing code helpers if needed)
+
     @MainActor
     func updatePurchasedStatus() async {
         var hasActiveStatus = false
+        var activePlan: PlanStatus = .free
         
         // 現在の有効な権利を確認
         for await result in Transaction.currentEntitlements {
@@ -131,6 +143,18 @@ final class StoreManager {
                 // 該当するプロダクトIDであれば有効とみなす
                 if ProductID.all.contains(transaction.productID) {
                     hasActiveStatus = true
+                    
+                    // プラン判定
+                    switch transaction.productID {
+                    case ProductID.lifetime:
+                        activePlan = .lifetime
+                    case ProductID.monthly:
+                        activePlan = .monthly
+                    case ProductID.yearly:
+                        activePlan = .yearly
+                    default:
+                        break
+                    }
                 }
             } catch {
                 print("Failed to verify entitlement")
@@ -138,6 +162,8 @@ final class StoreManager {
         }
         
         self.isProMember = hasActiveStatus
+        self.currentPlan = activePlan
+        
         // AppStorageとの同期は View 側で行われているケースが多いが、
         // ここでも念のため同期しておく（SettingsViewModelなどがUserDefaultsを見ているため）
         UserDefaults.standard.set(hasActiveStatus, forKey: "isProMember")
