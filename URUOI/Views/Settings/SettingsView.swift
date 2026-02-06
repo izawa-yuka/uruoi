@@ -11,8 +11,7 @@ struct SettingsView: View {
     @AppStorage("isWaterAlertEnabled") private var isWaterAlertEnabled: Bool = true
     @AppStorage("waterReminderDays") private var waterReminderDays: Int = 1 // キーを修正: waterAlertInterval -> waterReminderDays
     @AppStorage("isHealthAlertEnabled") private var isHealthAlertEnabled: Bool = true
-    @AppStorage("healthAlertThreshold") private var healthAlertThreshold: Int = 200
-    
+    @AppStorage("healthAlertThreshold") private var healthAlertThreshold: 
     @State private var showingPremiumIntro = false
     @Environment(\.modelContext) private var modelContext
     #if DEBUG

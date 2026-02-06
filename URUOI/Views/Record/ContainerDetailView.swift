@@ -31,7 +31,10 @@ struct ContainerDetailView: View {
     }
     
     private var timelineItems: [TimelineItem] {
-        historyViewModel.convertToTimelineItems(records: historyRecords, modelContext: modelContext)
+        // クラッシュ対策: 削除されたレコードが配列に残っている場合にアクセスするとクラッシュするため、
+        // isDeletedフラグをチェックして有効なレコードのみを変換対象にする
+        let validRecords = historyRecords.filter { !$0.isDeleted }
+        return historyViewModel.convertToTimelineItems(records: validRecords, modelContext: modelContext)
     }
     
     var body: some View {
