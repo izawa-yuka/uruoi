@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct SettingsView: View {
     // dismissは不要になるので削除しても良いですが、念のため残しておいても問題ありません
@@ -139,6 +140,30 @@ struct SettingsView: View {
                     
                     if isHealthAlertEnabled {
                         Stepper("基準量: \(healthAlertThreshold) ml", value: $healthAlertThreshold, step: 50)
+                    }
+                }
+                
+                // MARK: - 言語設定
+                Section {
+                    Link(destination: URL(string: UIApplication.openSettingsURLString)!) {
+                        HStack {
+                            Label {
+                                Text("言語設定", tableName: "Localizable")
+                                    .foregroundStyle(.primary)
+                            } icon: {
+                                Image(systemName: "globe")
+                                    .foregroundStyle(.blue)
+                            }
+                            Spacer()
+                            if let languageCode = Bundle.main.preferredLocalizations.first,
+                               let languageName = Locale.current.localizedString(forIdentifier: languageCode) {
+                                Text(languageName)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
                     }
                 }
                 

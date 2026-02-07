@@ -7,11 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CE2F7A442F37032600116106 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = CE2F7A432F37032600116106 /* Localizable.xcstrings */; };
 		CE4C6ABC2F272BD40076E30D /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = CE4C6ABB2F272BD40076E30D /* FirebaseAuth */; };
 		CE4C6ABE2F272BD40076E30D /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = CE4C6ABD2F272BD40076E30D /* FirebaseFirestore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		CE2F7A432F37032600116106 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		CE3EC2492F06779900A2C0CF /* URUOI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = URUOI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -39,6 +41,7 @@
 		CE3EC2402F06779900A2C0CF = {
 			isa = PBXGroup;
 			children = (
+				CE2F7A432F37032600116106 /* Localizable.xcstrings */,
 				CE3EC24B2F06779900A2C0CF /* URUOI */,
 				CE3EC24A2F06779900A2C0CF /* Products */,
 			);
@@ -121,6 +124,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CE2F7A442F37032600116106 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -197,6 +201,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -254,6 +259,7 @@
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
