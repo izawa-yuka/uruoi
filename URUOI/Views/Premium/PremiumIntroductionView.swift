@@ -34,14 +34,14 @@ struct PremiumIntroductionView: View {
             }
         }
         
-        var period: String {
+        var period: LocalizedStringKey {
             switch self {
             case .monthly: return "月額"
             case .yearly: return "年額"
             }
         }
         
-        var badge: String? {
+        var badge: LocalizedStringKey? {
             switch self {
             case .monthly: return nil
             case .yearly: return "2ヶ月分お得"
@@ -337,8 +337,8 @@ struct PlanCard: View {
 // MARK: - FeatureRow
 struct FeatureRow: View {
     let icon: String
-    let title: String
-    let description: String
+    let title: LocalizedStringKey
+    let description: LocalizedStringKey
     
     var body: some View {
         HStack(alignment: .top, spacing: 16) {

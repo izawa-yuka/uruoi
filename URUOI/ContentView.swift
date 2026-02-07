@@ -70,7 +70,7 @@ struct ContentView: View {
         .preferredColorScheme(.light) // アプリ全体をライトモードに固定
         .onAppear {
             configureTabBarAppearance()
-            injectInitialDataIfNeeded()
+            // injectInitialDataIfNeeded() // 初回データ生成を無効化
         }
     }
     
@@ -93,8 +93,9 @@ struct ContentView: View {
         UITabBar.appearance().scrollEdgeAppearance = appearance
     }
     
-    // MARK: - 初期データ注入
+    // MARK: - 初期データ注入 (無効化中)
     
+    /*
     /// 初回起動時にContainerMasterの初期データを注入
     private func injectInitialDataIfNeeded() {
         // アーカイブされていないコンテナが存在するかチェック
@@ -110,11 +111,11 @@ struct ContentView: View {
             
             // 初期データを注入
             let initialContainers: [(name: String, emptyWeight: Double)] = [
-                ("白の大きい器", 1185),
-                ("緑の大きい器", 1166),
-                ("Mサイズ", 902),
-                ("Sサイズ", 494),
-                ("ボトル", 0)
+                ("白の大きい器", 1185.0),
+                ("緑の大きい器", 1166.0),
+                ("Mサイズ", 902.0),
+                ("Sサイズ", 494.0),
+                ("ボトル", 0.0)
             ]
             
             for container in initialContainers {
@@ -124,13 +125,14 @@ struct ContentView: View {
                 )
                 modelContext.insert(newContainer)
             }
-            
-            try modelContext.save()
+            // try modelContext.save() は自動保存されるため明示的に呼ばなくても良い場合が多いが念のため
+            try? modelContext.save()
             print("✅ 初期データの注入が完了しました")
         } catch {
             print("❌ 初期データ注入エラー: \(error)")
         }
     }
+    */
 }
 
 // MARK: - SplashView

@@ -17,9 +17,22 @@
 		CE3EC2492F06779900A2C0CF /* URUOI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = URUOI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		CE2F7A462F37067B00116106 /* Exceptions for "URUOI" folder in "URUOI" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = CE3EC2482F06779900A2C0CF /* URUOI */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		CE3EC24B2F06779900A2C0CF /* URUOI */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				CE2F7A462F37067B00116106 /* Exceptions for "URUOI" folder in "URUOI" target */,
+			);
 			path = URUOI;
 			sourceTree = "<group>";
 		};
@@ -98,11 +111,12 @@
 				};
 			};
 			buildConfigurationList = CE3EC2442F06779900A2C0CF /* Build configuration list for PBXProject "URUOI" */;
-			developmentRegion = en;
+			developmentRegion = ja;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
+				ja,
 			);
 			mainGroup = CE3EC2402F06779900A2C0CF;
 			minimizedProjectReferenceProxies = 1;
@@ -276,6 +290,7 @@
 				DEVELOPMENT_TEAM = 44W2CS8RDU;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = URUOI/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen";
@@ -315,6 +330,7 @@
 				DEVELOPMENT_TEAM = 44W2CS8RDU;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = URUOI/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen";
