@@ -14,6 +14,7 @@ struct ContentView: View {
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding: Bool = false
     // 共有用ID
     @AppStorage("householdID") private var householdID: String = ""
+    @State private var showWhatsNew = false
 
     var body: some View {
         // スプラッシュ画面を削除し、直接メイン画面へ遷移
@@ -30,6 +31,8 @@ struct ContentView: View {
                     if !householdID.isEmpty {
                         DataSyncService.shared.startSync(householdID: householdID, modelContext: modelContext)
                     }
+                    // バージョンチェックを行う
+                    checkForUpdates()
                 }
                 .onChange(of: householdID) { oldValue, newValue in
                     if newValue.isEmpty {
@@ -38,6 +41,11 @@ struct ContentView: View {
                     } else {
                         // ログイン/参加時
                         DataSyncService.shared.startSync(householdID: newValue, modelContext: modelContext)
+                    }
+                }
+                .sheet(isPresented: $showWhatsNew) {
+                    WhatsNewView {
+                        updateSavedVersion()
                     }
                 }
         }
@@ -133,6 +141,21 @@ struct ContentView: View {
         }
     }
     */
+    // MARK: - App Version
+    
+    private func checkForUpdates() {
+        let currentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+        let savedVersion = UserDefaults.standard.string(forKey: "savedAppVersion")
+        
+        if savedVersion != currentVersion {
+            showWhatsNew = true
+        }
+    }
+    
+    private func updateSavedVersion() {
+        let currentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+        UserDefaults.standard.set(currentVersion, forKey: "savedAppVersion")
+    }
 }
 
 // MARK: - SplashView
