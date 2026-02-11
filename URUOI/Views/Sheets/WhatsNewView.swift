@@ -20,19 +20,25 @@ struct WhatsNewView: View {
                         featureRow(
                             icon: "globe",
                             title: "英語対応",
-                            description: "アプリが英語表示に対応しました。"
+                            description: "アプリの言語が英語表示に対応しました。端末の設定に合わせて自動で切り替わります。"
                         )
                         
                         featureRow(
-                            icon: "person.2.fill",
-                            title: "家族共有の改善",
-                            description: "共有相手の記録がより分かりやすくなりました。"
+                            icon: "person.2.fill", // 共有アイコン
+                            title: "共有機能の強化",
+                            description: "相手が水を換えた時に通知が届くようになりました。また、履歴画面で「相手の記録」がひと目で分かります。"
                         )
                         
                         featureRow(
-                            icon: "list.bullet.rectangle.portrait.fill",
-                            title: "履歴機能の強化",
-                            description: "誰が記録したかがアイコンで判別できるようになりました。"
+                            icon: "pawprint.fill", // 猫の足跡アイコン
+                            title: "頭数設定の追加",
+                            description: "設定画面から猫ちゃんの頭数を登録できるようになりました。1匹あたりの平均飲水量の計算に使われます。"
+                        )
+                        
+                        featureRow(
+                            icon: "hammer.fill", // 修復・安定性向上をイメージ
+                            title: "安定性の向上",
+                            description: "履歴を削除する際にアプリが終了してしまう不具合など、細かな修正を行いました。"
                         )
                     }
                     .padding(.horizontal, 24)
@@ -63,7 +69,8 @@ struct WhatsNewView: View {
     }
     
     // 新機能の行コンポーネント
-    private func featureRow(icon: String, title: String, description: String) -> some View {
+    // LocalizedStringKeyを受け取るように変更して、多言語対応しやすくしました
+    private func featureRow(icon: String, title: LocalizedStringKey, description: LocalizedStringKey) -> some View {
         HStack(alignment: .top, spacing: 16) {
             Image(systemName: icon)
                 .font(.system(size: 30))

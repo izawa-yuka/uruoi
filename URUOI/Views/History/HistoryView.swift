@@ -45,17 +45,16 @@ struct HistoryView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // ▼▼▼ 修正: 他のタブと同様に HStack + Spacer で左寄せレイアウトにする ▼▼▼
+                // ヘッダー
                 HStack {
                     CommonHeaderView(weeklyAveragePerCat: recordViewModel.weeklyAveragePerCat)
                         .id("header-\(recordViewModel.lastUpdateTimestamp.timeIntervalSince1970)")
                     
-                    Spacer() // これがあることでヘッダーが左に寄り、他のタブと位置が揃います
+                    Spacer()
                 }
-                .padding(.horizontal) // 分析・記録タブと同じ余白 (16pt)
+                .padding(.horizontal)
                 .padding(.top, 16)
                 .padding(.bottom, 12)
-                // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
                 
                 // コンテンツ部分
                 if timelineItems.isEmpty {
@@ -69,38 +68,21 @@ struct HistoryView: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
-                    ScrollView {
-                        LazyVStack(spacing: 24) {
-                            ForEach(sortedDates, id: \.self) { date in
-                                VStack(alignment: .leading, spacing: 8) {
-                                    // 日付タイトル
-                                    Text(date)
-                                        .font(.headline)
-                                        .foregroundColor(.secondary)
-                                        .padding(.leading, 8)
-                                    
-                                    // その日の記録カード
-                                    VStack(spacing: 0) {
-                                        let items = groupedItems[date] ?? []
-                                        ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
-                                            TimelineRow(item: item, viewModel: viewModel)
-                                                .padding(.horizontal, 16)
-                                                .padding(.vertical, 12)
-                                            
-                                            if index < items.count - 1 {
-                                                Divider().padding(.leading, 16)
-                                            }
-                                        }
-                                    }
-                                    .background(Color.white)
-                                    .cornerRadius(16)
+                    List {
+                        ForEach(sortedDates, id: \.self) { date in
+                            Section(header: Text(date)) {
+                                ForEach(groupedItems[date] ?? []) { item in
+                                    TimelineRow(item: item, viewModel: viewModel)
+                                }
+                                .onDelete { offsets in
+                                    deleteItems(at: offsets, in: groupedItems[date] ?? [])
                                 }
                             }
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.top, 8) // リスト上部の余白微調整
-                        .padding(.bottom, 80)
                     }
+                    .listStyle(.insetGrouped)
+                    .scrollContentBackground(.hidden)
+                    .background(Color.backgroundGray)
                 }
             }
             .background(Color.backgroundGray) // 背景色を全体に適用
@@ -113,6 +95,20 @@ struct HistoryView: View {
             .onChange(of: records) { _, _ in
                 recordViewModel.calculateWeeklyAverage(using: modelContext)
             }
+        }
+    }
+    
+    private func deleteItems(at offsets: IndexSet, in items: [TimelineItem]) {
+        withAnimation {
+            for index in offsets {
+                if index < items.count {
+                    let item = items[index]
+                    if let record = modelContext.model(for: item.recordID) as? WaterRecord {
+                        modelContext.delete(record)
+                    }
+                }
+            }
+            try? modelContext.save()
         }
     }
     

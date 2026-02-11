@@ -170,6 +170,7 @@
       }
     },
     "📸 スクリーンショット用" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -180,6 +181,7 @@
       }
     },
     "🔔 通知デバッグ" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -210,7 +212,14 @@
       }
     },
     "2ヶ月分お得" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save 2 months"
+          }
+        }
+      }
     },
     "2時間30分経過" : {
       "comment" : "A text that appears below a name in the OnboardingContainerCard, indicating the duration of time that has passed since the recording.",
@@ -225,6 +234,7 @@
       }
     },
     "5秒後にテスト通知" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -294,6 +304,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "About App"
+          }
+        }
+      }
+    },
+    "アプリの言語が英語表示に対応しました。端末の設定に合わせて自動で切り替わります。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The app now supports English. It switches automatically based on your device settings."
           }
         }
       }
@@ -477,6 +497,7 @@
       }
     },
     "スクショ用データを生成" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -517,6 +538,7 @@
       }
     },
     "データの生成" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -695,7 +717,14 @@
       }
     },
     "リアルタイムで記録を同期。「あれ？お水かえたっけ？」の心配がなくなります。" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Real-time sync. No more wondering \"Did I change it?\""
+          }
+        }
+      }
     },
     "上書きして共有を受ける" : {
       "localizations" : {
@@ -800,7 +829,14 @@
       }
     },
     "健康管理の要" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Essential for health management"
+          }
+        }
+      }
     },
     "入力エラー" : {
       "comment" : "An alert that appears when there is an input error.",
@@ -840,6 +876,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Unsharing does not delete data. You can restore it by entering the same ID."
+          }
+        }
+      }
+    },
+    "共有機能の強化" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enhanced Sharing"
           }
         }
       }
@@ -897,7 +943,14 @@
       }
     },
     "分析グラフの閲覧" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "View Analytics Graphs"
+          }
+        }
+      }
     },
     "利用規約" : {
       "localizations" : {
@@ -988,7 +1041,14 @@
       }
     },
     "器の登録数 無制限" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unlimited Bowls"
+          }
+        }
+      }
     },
     "器を削除しますか？" : {
       "comment" : "A confirmation alert title asking if the user wants to delete a container.",
@@ -1107,7 +1167,14 @@
       }
     },
     "多頭飼いも安心" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Great for multiple pets"
+          }
+        }
+      }
     },
     "天気" : {
       "comment" : "A label for the weather section in the \"Finish Recording\" sheet.",
@@ -1117,6 +1184,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Weather"
+          }
+        }
+      }
+    },
+    "安定性の向上" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stability Improvements"
           }
         }
       }
@@ -1215,6 +1292,16 @@
         }
       }
     },
+    "履歴を削除する際にアプリが終了してしまう不具合など、細かな修正を行いました。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fixed an issue where the app would crash when deleting history, and other minor improvements."
+          }
+        }
+      }
+    },
     "平均 (7日間)" : {
       "localizations" : {
         "en" : {
@@ -1238,7 +1325,14 @@
       }
     },
     "年額" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yearly"
+          }
+        }
+      }
     },
     "年額 %@" : {
       "comment" : "A label displaying the annual price of a subscription plan. The argument is the annual price of the plan.",
@@ -1273,6 +1367,7 @@
       }
     },
     "待機中の通知リストを出力" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1354,6 +1449,16 @@
         }
       }
     },
+    "新機能のお知らせ" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What's New"
+          }
+        }
+      }
+    },
     "新規設置" : {
       "localizations" : {
         "en" : {
@@ -1365,6 +1470,7 @@
       }
     },
     "既存のデータはすべて削除され、ダミーデータに置き換わります。よろしいですか？" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1397,7 +1503,14 @@
       }
     },
     "月額" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monthly"
+          }
+        }
+      }
     },
     "有効にする" : {
       "localizations" : {
@@ -1420,6 +1533,7 @@
       }
     },
     "権限ステータス確認" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1494,7 +1608,14 @@
       }
     },
     "水換えリマインド通知" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Water Refill Alerts"
+          }
+        }
+      }
     },
     "無料プランでは最大%lldつまで登録できます。\n新しい器を追加するには、リストから不要な器を選択し、詳細画面から削除してください。またはもっと！URUOIプランへのアップグレードをご検討ください。" : {
       "comment" : "An alert message explaining the benefits of upgrading to the premium plan, including the free user limit and how to dismiss alerts.",
@@ -1504,6 +1625,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "The Free Plan allows up to %lld bowls.\nTo add more, please delete an existing bowl or consider upgrading to the URUOI Premium Plan."
+          }
+        }
+      }
+    },
+    "猫の設定" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pet Settings"
+          }
+        }
+      }
+    },
+    "猫の頭数: %lld匹" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Number of Pets: %lld"
           }
         }
       }
@@ -1539,6 +1680,7 @@
       }
     },
     "生成する" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1554,6 +1696,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Limit Reached"
+          }
+        }
+      }
+    },
+    "相手が水を換えた時に通知が届くようになりました。また、履歴画面で「相手の記録」がひと目で分かります。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Receive notifications when your partner changes water. Shared records are now easier to identify in history."
           }
         }
       }
@@ -1601,10 +1753,44 @@
       }
     },
     "継続のサポート" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supports your routine"
+          }
+        }
+      }
+    },
+    "続ける" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue"
+          }
+        }
+      }
+    },
+    "英語対応" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "English Support"
+          }
+        }
+      }
     },
     "言語設定" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Language"
+          }
+        }
+      }
     },
     "記録" : {
       "localizations" : {
@@ -1681,11 +1867,22 @@
       }
     },
     "設定アプリから通知を許可してください。" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Please enable notifications in Settings app."
+          }
+        }
+      }
+    },
+    "設定画面から猫ちゃんの頭数を登録できるようになりました。1匹あたりの平均飲水量の計算に使われます。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can now set the number of pets in Settings. Used to calculate average water intake per pet."
           }
         }
       }
@@ -1799,6 +1996,7 @@
       }
     },
     "通知が無効です" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1856,6 +2054,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hide"
+          }
+        }
+      }
+    },
+    "頭数設定の追加" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pet Count Setting"
           }
         }
       }

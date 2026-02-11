@@ -13,6 +13,7 @@ struct SettingsView: View {
     @AppStorage("waterReminderDays") private var waterReminderDays: Int = 1 // キーを修正: waterAlertInterval -> waterReminderDays
     @AppStorage("isHealthAlertEnabled") private var isHealthAlertEnabled: Bool = true
     @AppStorage("healthAlertThreshold") private var healthAlertThreshold: Int = 200
+    @AppStorage("numberOfPets") private var numberOfPets: Int = 1
     
     @State private var showingPremiumIntro = false
     @Environment(\.modelContext) private var modelContext
@@ -106,6 +107,13 @@ struct SettingsView: View {
                                     .foregroundStyle(.secondary)
                             }
                         }
+                    }
+                }
+                
+                // MARK: - 猫の設定
+                Section(header: Text("猫の設定")) {
+                    Stepper(value: $numberOfPets, in: 1...20) {
+                        Text(String(localized: "猫の頭数: \(numberOfPets)匹"))
                     }
                 }
                 
