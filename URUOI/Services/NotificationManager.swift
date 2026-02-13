@@ -49,8 +49,8 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
             }
             
             let content = UNMutableNotificationContent()
-            content.title = "お水交換のお知らせ 💧"
-            content.body = "「\(containerName)」のお水が古くなっているかもしれません。新鮮なお水に変えてあげましょう"
+            content.title = String(localized: "お水交換のお知らせ 💧")
+            content.body = String(localized: "「\(containerName)」のお水が古くなっているかもしれません。新鮮なお水に変えてあげましょう")
             content.sound = .default
             
             // 過去の日時なら即時通知、未来ならカレンダートリガーを使用
@@ -126,8 +126,8 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     
     func debugSendTestNotification() {
         let content = UNMutableNotificationContent()
-        content.title = "🔔 テスト通知"
-        content.body = "これは5秒後のテスト通知です。通知機能は正常に動作しています。"
+        content.title = String(localized: "🔔 テスト通知")
+        content.body = String(localized: "これは5秒後のテスト通知です。通知機能は正常に動作しています。")
         content.sound = .default
         
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5.0, repeats: false)
@@ -138,6 +138,28 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
                 print("テスト通知エラー: \(error)")
             } else {
                 print("🚀 テスト通知をスケジュールしました（5秒後）")
+            }
+        }
+    }
+    
+    /// 健康アラートのテスト発火（強制的に通知を送る）
+    func debugSendHealthAlert(currentAmount: Int, threshold: Int) {
+        let content = UNMutableNotificationContent()
+        content.title = String(localized: "⚠️ 健康アラート")
+        content.body = String(localized: "昨日の飲水量が基準(\(threshold)ml)を下回っています(実績: \(currentAmount)ml)。体調の変化に注意してください。")
+        content.sound = .default
+        
+        // 5秒後に発火
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5.0, repeats: false)
+        let request = UNNotificationRequest(identifier: "health_alert_test_\(UUID().uuidString)", content: content, trigger: trigger)
+        
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("🔴 [Notification] 健康アラート通知エラー: \(error)")
+            } else {
+                print("🚀 [Notification] 健康アラートのテスト通知をスケジュールしました（5秒後）")
+                print("   - 設定値: \(threshold)ml")
+                print("   - 実績値: \(currentAmount)ml")
             }
         }
     }

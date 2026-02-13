@@ -28,28 +28,37 @@ struct TimelineItem: Identifiable {
 }
 
 // MARK: - AnalysisPeriod（期間選択用）
+// MARK: - AnalysisPeriod（期間選択用）
 enum AnalysisPeriod: String, CaseIterable {
-    case week = "週"
-    case month = "月"
-    case year = "年"
+    case week = "week"
+    case month = "month"
+    case year = "year"
+    
+    var localizedTitle: String {
+        switch self {
+        case .week: return String(localized: "週")
+        case .month: return String(localized: "月")
+        case .year: return String(localized: "年")
+        }
+    }
     
     func periodTitle(for date: Date) -> String {
         let calendar = Calendar.current
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ja_JP")
+        formatter.locale = Locale.current
         
         switch self {
         case .week:
-            let weekInterval = calendar.dateInterval(of: .weekOfYear, for: date)!
+            guard let weekInterval = calendar.dateInterval(of: .weekOfYear, for: date) else { return "" }
             let start = weekInterval.start
-            let end = calendar.date(byAdding: .day, value: 6, to: start)!
-            formatter.dateFormat = "M/d"
+            let end = calendar.date(byAdding: .day, value: 6, to: start) ?? start
+            formatter.setLocalizedDateFormatFromTemplate("Md")
             return "\(formatter.string(from: start)) - \(formatter.string(from: end))"
         case .month:
-            formatter.dateFormat = "yyyy年M月"
+            formatter.setLocalizedDateFormatFromTemplate("yMMMM")
             return formatter.string(from: date)
         case .year:
-            formatter.dateFormat = "yyyy年"
+            formatter.setLocalizedDateFormatFromTemplate("y")
             return formatter.string(from: date)
         }
     }
@@ -118,27 +127,35 @@ final class HistoryViewModel {
             let nextDate: Date
             let label: String
             
+            // 安全な日付計算
             switch selectedPeriod {
             case .week:
-                nextDate = calendar.date(byAdding: .day, value: 1, to: dateIterator)!
+                nextDate = calendar.date(byAdding: .day, value: 1, to: dateIterator) ?? dateIterator.addingTimeInterval(86400)
                 
                 // 曜日のみを表示（日本語ロケールを指定）
                 let weekday = calendar.component(.weekday, from: dateIterator)
                 let formatter = DateFormatter()
-                formatter.locale = Locale(identifier: "ja_JP")
-                let weekdayStr = formatter.shortWeekdaySymbols[weekday - 1]
+                formatter.locale = Locale.current
                 
-                // 曜日のみをラベルに設定（例: "月", "火", "水"）
-                label = weekdayStr
+                // 曜日のみをラベルに設定
+                label = formatter.shortWeekdaySymbols[safe: weekday - 1] ?? ""
             case .month:
-                nextDate = calendar.date(byAdding: .day, value: 1, to: dateIterator)!
-                label = "\(calendar.component(.day, from: dateIterator))日"
+                nextDate = calendar.date(byAdding: .day, value: 1, to: dateIterator) ?? dateIterator.addingTimeInterval(86400)
+                let formatter = DateFormatter()
+                formatter.locale = Locale.current
+                formatter.setLocalizedDateFormatFromTemplate("d")
+                label = formatter.string(from: dateIterator)
             case .year:
-                nextDate = calendar.date(byAdding: .month, value: 1, to: dateIterator)!
-                label = "\(calendar.component(.month, from: dateIterator))月"
+                nextDate = calendar.date(byAdding: .month, value: 1, to: dateIterator) ?? dateIterator.addingTimeInterval(86400 * 30)
+                let formatter = DateFormatter()
+                formatter.locale = Locale.current
+                formatter.setLocalizedDateFormatFromTemplate("MMM")
+                label = formatter.string(from: dateIterator)
             }
             
-            // recordsInChunk を先に定義してから使用する
+            // 無限ループ防止（万が一 nextDate が進まない場合）
+            if nextDate <= dateIterator { break }
+            
             let recordsInChunk = filteredRecords.filter {
                 guard let rEnd = $0.endTime else { return false }
                 return rEnd >= dateIterator && rEnd < nextDate
@@ -172,9 +189,9 @@ final class HistoryViewModel {
     func getComparisonText(currentAverage: Double, previousAverage: Double) -> String? {
         guard previousAverage > 0 else { return nil }
         let diff = currentAverage - previousAverage
-        if diff > 0 { return "前回より \(Int(diff))ml 増加" }
-        else if diff < 0 { return "前回より \(Int(abs(diff)))ml 減少" }
-        else { return "前回と同じ" }
+        if diff > 0 { return String(localized: "前回より \(Int(diff))ml 増加") }
+        else if diff < 0 { return String(localized: "前回より \(Int(abs(diff)))ml 減少") }
+        else { return String(localized: "前回と同じ") }
     }
     
     // MARK: - タイムライン変換 (履歴画面用)
@@ -182,7 +199,7 @@ final class HistoryViewModel {
         var items: [TimelineItem] = []
         for record in records {
             // コンテナ名を取得（削除されている場合などを考慮）
-            let containerName = record.container?.name ?? "不明な容器"
+            let containerName = record.container?.name ?? String(localized: "不明な容器")
             
             // 設置レコード
             let setupItem = TimelineItem(
@@ -231,15 +248,16 @@ final class HistoryViewModel {
     
     func formatDate(_ date: Date) -> String {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ja_JP")
-        formatter.dateFormat = "yyyy/MM/dd"
+        formatter.locale = Locale.current
+        formatter.setLocalizedDateFormatFromTemplate("yMMMMd")
         return formatter.string(from: date)
     }
     
     func formatTime(_ date: Date) -> String {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ja_JP")
-        formatter.dateFormat = "HH:mm"
+        formatter.locale = Locale.current
+        formatter.dateStyle = .none
+        formatter.timeStyle = .short
         return formatter.string(from: date)
     }
 }

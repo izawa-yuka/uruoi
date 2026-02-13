@@ -31,7 +31,7 @@ struct SettingsView: View {
                         switch StoreManager.shared.currentPlan {
                         case .lifetime:
                             Label {
-                                Text("ずっと！URUOIプラン（買い切り）")
+                                Text(String(localized: "ずっと！URUOIプラン（買い切り）"))
                                     .foregroundStyle(.primary)
                                     .fontWeight(.bold)
                             } icon: {
@@ -40,7 +40,7 @@ struct SettingsView: View {
                             }
                         case .monthly:
                             Label {
-                                Text("もっと！URUOIプラン（月額）")
+                                Text(String(localized: "もっと！URUOIプラン（月額）"))
                                     .foregroundStyle(.primary)
                                     .fontWeight(.bold)
                             } icon: {
@@ -49,7 +49,7 @@ struct SettingsView: View {
                             }
                         case .yearly:
                             Label {
-                                Text("もっと！URUOIプラン（年額）")
+                                Text(String(localized: "もっと！URUOIプラン（年額）"))
                                     .foregroundStyle(.primary)
                                     .fontWeight(.bold)
                             } icon: {
@@ -57,7 +57,7 @@ struct SettingsView: View {
                                     .foregroundStyle(.yellow)
                             }
                         case .free:
-                            Text("現在のプラン: 無料プラン")
+                            Text(String(localized: "現在のプラン: 無料プラン"))
                         }
                     }
                 }
@@ -71,7 +71,7 @@ struct SettingsView: View {
                             HStack {
                                 Image(systemName: "sparkles")
                                     .foregroundStyle(.yellow)
-                                Text("もっと！URUOIプランを見る")
+                                Text(String(localized: "もっと！URUOIプランを見る"))
                                     .fontWeight(.bold)
                                 Spacer()
                                 Image(systemName: "chevron.right")
@@ -83,13 +83,13 @@ struct SettingsView: View {
                 }
                 
                 // MARK: - 家族共有設定
-                Section(header: Text("データ共有"), footer: Text("記録を家族と共有することができます。")) {
+                Section(header: Text(String(localized: "データ共有")), footer: Text(String(localized: "記録を家族と共有することができます。"))) {
                     if isProMember {
                         NavigationLink(destination: FamilySharingView()) {
                             HStack {
                                 Image(systemName: "house.fill")
                                     .foregroundStyle(.blue)
-                                Text("家族共有")
+                                Text(String(localized: "家族共有"))
                             }
                         }
                     } else {
@@ -99,7 +99,7 @@ struct SettingsView: View {
                             HStack {
                                 Image(systemName: "house.fill")
                                     .foregroundStyle(.blue)
-                                Text("家族共有")
+                                Text(String(localized: "家族共有"))
                                     .foregroundStyle(.primary)
                                 Spacer()
                                 Image(systemName: "lock.fill")
@@ -111,27 +111,27 @@ struct SettingsView: View {
                 }
                 
                 // MARK: - 猫の設定
-                Section(header: Text("猫の設定")) {
+                Section(header: Text(String(localized: "猫の設定"))) {
                     Stepper(value: $numberOfPets, in: 1...20) {
                         Text(String(localized: "猫の頭数: \(numberOfPets)匹"))
                     }
                 }
                 
                 // MARK: - 水換えアラート
-                Section(header: Text("水換えアラート"), footer: Text("水を換えてから指定した日数が経過すると通知が届きます。")) {
+                Section(header: Text(String(localized: "水換えアラート")), footer: Text(String(localized: "水を換えてから指定した日数が経過すると通知が届きます。"))) {
                     if isProMember {
-                        Toggle("有効にする", isOn: $isWaterAlertEnabled)
+                        Toggle(String(localized: "有効にする"), isOn: $isWaterAlertEnabled)
                             .tint(.blue)
                         
                         if isWaterAlertEnabled {
-                            Stepper("通知間隔: \(waterReminderDays) 日", value: $waterReminderDays, in: 1...30)
+                            Stepper(String(localized: "通知間隔: \(waterReminderDays) 日"), value: $waterReminderDays, in: 1...30)
                         }
                     } else {
                         Button {
                             showingPremiumIntro = true
                         } label: {
                             HStack {
-                                Text("有効にする")
+                                Text(String(localized: "有効にする"))
                                     .foregroundStyle(.primary)
                                 Spacer()
                                 Image(systemName: "lock.fill")
@@ -142,12 +142,12 @@ struct SettingsView: View {
                 }
                 
                 // MARK: - 健康アラート
-                Section(header: Text("健康アラート"), footer: Text("1日の飲水量が基準を下回った場合に通知します。")) {
-                    Toggle("有効にする", isOn: $isHealthAlertEnabled)
+                Section(header: Text(String(localized: "健康アラート")), footer: Text(String(localized: "1日の飲水量が基準を下回った場合に通知します。"))) {
+                    Toggle(String(localized: "有効にする"), isOn: $isHealthAlertEnabled)
                         .tint(.blue)
                     
                     if isHealthAlertEnabled {
-                        Stepper("基準量: \(healthAlertThreshold) ml", value: $healthAlertThreshold, step: 50)
+                        Stepper(String(localized: "基準量: \(healthAlertThreshold) ml"), value: $healthAlertThreshold, step: 50)
                     }
                 }
                 
@@ -176,17 +176,17 @@ struct SettingsView: View {
                 }
                 
                 // MARK: - サポート
-                Section("サポート") {
-                    Link("よくある質問", destination: AppConfig.faqURL)
-                    Link("利用規約", destination: AppConfig.termsURL)
-                    Link("プライバシーポリシー", destination: AppConfig.privacyPolicyURL)
-                    Link("お問い合わせ・フィードバック", destination: AppConfig.supportURL)
+                Section(String(localized: "サポート")) {
+                    Link(String(localized: "よくある質問"), destination: AppConfig.faqURL)
+                    Link(String(localized: "利用規約"), destination: AppConfig.termsURL)
+                    Link(String(localized: "プライバシーポリシー"), destination: AppConfig.privacyPolicyURL)
+                    Link(String(localized: "お問い合わせ・フィードバック"), destination: AppConfig.supportURL)
                 }
                 
                 // MARK: - アプリ情報
-                Section("アプリについて") {
+                Section(String(localized: "アプリについて")) {
                     HStack {
-                        Text("バージョン")
+                        Text(String(localized: "バージョン"))
                         Spacer()
                         Text(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0")
                             .foregroundStyle(.secondary)
@@ -263,6 +263,11 @@ struct SettingsView: View {
                         }
                     }
                     .foregroundColor(.green)
+                    
+                    Button("健康アラートをテスト発火(5秒後)") {
+                        NotificationManager.shared.debugSendHealthAlert(currentAmount: 150, threshold: healthAlertThreshold)
+                    }
+                    .foregroundColor(.orange)
                 }
                 #endif
             }

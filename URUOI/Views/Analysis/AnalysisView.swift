@@ -118,7 +118,7 @@ struct AnalysisView: View {
     private var periodPicker: some View {
         Picker("期間", selection: $viewModel.selectedPeriod) {
             ForEach(AnalysisPeriod.allCases, id: \.self) { period in
-                Text(period.rawValue).tag(period)
+                Text(period.localizedTitle).tag(period)
             }
         }
         .pickerStyle(.segmented)
@@ -143,7 +143,10 @@ struct AnalysisView: View {
     // ▼▼▼ 修正点2: .commonShadow() を削除（グラフカード） ▼▼▼
     private var chartCard: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("飲水量の推移").font(.headline).foregroundColor(.primary).padding(.horizontal)
+            Text(String(localized: "飲水量の推移"))
+                .font(.headline)
+                .foregroundColor(.primary)
+                .padding(.horizontal)
             if periodData.isEmpty {
                 emptyChart
             } else {
@@ -163,7 +166,9 @@ struct AnalysisView: View {
     private var emptyChart: some View {
         VStack(spacing: 16) {
             Image(systemName: "chart.bar").font(.system(size: 60)).foregroundColor(.secondary)
-            Text("この期間のデータがありません").font(.subheadline).foregroundColor(.secondary)
+            Text(String(localized: "この期間のデータがありません"))
+                .font(.subheadline)
+                .foregroundColor(.secondary)
         }
         .frame(maxWidth: .infinity).frame(height: 300).padding()
     }
@@ -171,11 +176,11 @@ struct AnalysisView: View {
     private var chart: some View {
         Chart {
             ForEach(highlightData) { data in
-                BarMark(x: .value("期間", data.label), yStart: .value("底", 0), yEnd: .value("最大", chartYScaleDomain), width: .ratio(1.0))
+                BarMark(x: .value(String(localized: "期間"), data.label), yStart: .value(String(localized: "底"), 0), yEnd: .value(String(localized: "最大"), chartYScaleDomain), width: .ratio(1.0))
                     .foregroundStyle(Color.appMain.opacity(0.1))
             }
             ForEach(chartData) { data in
-                BarMark(x: .value("期間", data.label), y: .value("飲水量", data.totalAmount))
+                BarMark(x: .value(String(localized: "期間"), data.label), y: .value(String(localized: "飲水量"), data.totalAmount))
                     .foregroundStyle(Color.appMain).cornerRadius(4)
             }
         }
@@ -209,8 +214,9 @@ struct AnalysisView: View {
         switch viewModel.selectedPeriod {
         case .week: return true
         case .month:
-            let dayString = label.replacingOccurrences(of: "日", with: "")
-            if let day = Int(dayString) { return day == 1 || day % 5 == 0 }
+            // "15日"などのフォーマットから数値を取り出す
+            let numerics = label.components(separatedBy: CharacterSet.decimalDigits.inverted).joined()
+            if let day = Int(numerics) { return day == 1 || day % 5 == 0 }
             return false
         case .year: return true
         }
@@ -222,8 +228,17 @@ struct AnalysisView: View {
     private var averageCard: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("平均摂取量 (1匹あたり)").font(.headline).foregroundColor(.primary)
-                Text(viewModel.selectedPeriod == .week ? "過去7日間" : (viewModel.selectedPeriod == .month ? "今月" : "今年"))
+                Text(String(localized: "平均摂取量 (1匹あたり)"))
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                
+                let periodText = switch viewModel.selectedPeriod {
+                    case .week: String(localized: "過去7日間")
+                    case .month: String(localized: "今月")
+                    case .year: String(localized: "今年")
+                }
+                
+                Text(periodText)
                     .font(.caption).foregroundColor(.secondary)
             }
             Spacer()
@@ -265,14 +280,14 @@ struct ProLockOverlay: View {
                 .font(.system(size: 50))
                 .foregroundColor(.appMain)
             
-            Text("もっと！URUOIプランでグラフを見る")
+            Text(String(localized: "もっと！URUOIプランでグラフを見る"))
                 .font(.headline)
                 .foregroundColor(.primary)
             
             Button {
                 showingPremiumIntro = true
             } label: {
-                Text("詳しく見る")
+                Text(String(localized: "詳しく見る"))
                     .font(.headline)
                     .foregroundColor(.white)
                     .frame(width: 160, height: 48)

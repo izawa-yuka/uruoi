@@ -25,7 +25,7 @@ struct OnboardingView: View {
                             hasSeenOnboarding = true
                         }
                     } label: {
-                        Text("スキップ")
+                        Text("スキップ", comment: "Onboarding skip button")
                             .font(.body)
                             .foregroundColor(.secondary)
                             .padding(.horizontal, 20)
@@ -73,14 +73,14 @@ struct IntroductionSlide: View {
             
             VStack(spacing: 12) {
                 // ⚠️ 修正: 猫 → ペット
-                Text("ペットのお水を\n記録しよう")
+                Text("ペットのお水を\n記録しよう", comment: "Onboarding title 1")
                     .font(.largeTitle)
                     .fontWeight(.bold)
                     .foregroundColor(.primary)
                     .multilineTextAlignment(.center)
                 
                 // ⚠️ 修正: 愛猫 → 大切なペット
-                Text("毎日の飲水量を手軽に記録して、\n大切なペットの健康管理をサポートします。")
+                Text("毎日の飲水量を手軽に記録して、\n大切なペットの健康管理をサポートします。", comment: "Onboarding description 1")
                     .font(.body)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -101,12 +101,12 @@ struct RecordingSlide: View {
             
             // タイトル
             VStack(spacing: 12) {
-                Text("器ごとに簡単記録")
+                Text("器ごとに簡単記録", comment: "Onboarding title 2")
                     .font(.title)
                     .fontWeight(.bold)
                     .foregroundColor(.primary)
                 
-                Text("『設置』と『回収』の2ステップ。\n実際の器と同じようにカードをタップするだけ。")
+                Text("『設置』と『回収』の2ステップ。\n実際の器と同じようにカードをタップするだけ。", comment: "Onboarding description 2")
                     .font(.body)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -118,14 +118,14 @@ struct RecordingSlide: View {
             VStack(spacing: 12) {
                 // アクティブな器のカード
                 OnboardingContainerCard(
-                    name: "白の大きい器",
+                    name: String(localized: "白の大きい器", comment: "Sample container name 1"),
                     isActive: true,
                     showTime: true
                 )
                 
                 // 非アクティブな器のカード
                 OnboardingContainerCard(
-                    name: "緑の大きい器",
+                    name: String(localized: "緑の大きい器", comment: "Sample container name 2"),
                     isActive: false,
                     showTime: false
                 )
@@ -157,7 +157,7 @@ struct OnboardingContainerCard: View {
                     .foregroundColor(.primary)
                 
                 if showTime {
-                    Text("2時間30分経過")
+                    Text("2時間30分経過", comment: "Sample elapsed time")
                         .font(.caption2)
                         .foregroundColor(.secondary)
                 }
@@ -189,12 +189,12 @@ struct AnalysisSlide: View {
             
             // タイトル
             VStack(spacing: 12) {
-                Text("グラフで変化を把握")
+                Text("グラフで変化を把握", comment: "Onboarding title 3")
                     .font(.title)
                     .fontWeight(.bold)
                     .foregroundColor(.primary)
                 
-                Text("日々の飲水量や傾向をグラフで確認。\n体調変化の気づきに役立ちます。")
+                Text("日々の飲水量や傾向をグラフで確認。\n体調変化の気づきに役立ちます。", comment: "Onboarding description 3")
                     .font(.body)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -246,8 +246,15 @@ struct OnboardingChartIllustration: View {
     }
     
     private func dayLabel(for index: Int) -> String {
-        let days = ["月", "火", "水", "木", "金", "土", "日"]
-        return days[index]
+        let formatter = DateFormatter()
+        formatter.locale = Locale.current
+        // DateFormatter.shortWeekdaySymbols は 日曜始まり(0:Sun, 1:Mon...)
+        let symbols = formatter.shortWeekdaySymbols ?? []
+        // indexは0(月)〜6(日)を想定
+        // index 0(Mon) -> symbols[1]
+        // index 6(Sun) -> symbols[0]
+        let reorderedIndex = (index + 1) % 7
+        return symbols.indices.contains(reorderedIndex) ? symbols[reorderedIndex] : ""
     }
 }
 
@@ -265,12 +272,12 @@ struct StartSlide: View {
                 .foregroundColor(.appMain)
             
             VStack(spacing: 12) {
-                Text("さあ、はじめましょう")
+                Text("さあ、はじめましょう", comment: "Onboarding title 4")
                     .font(.largeTitle)
                     .fontWeight(.bold)
                     .foregroundColor(.primary)
                 
-                Text("器を登録して、今日から記録を始めましょう。")
+                Text("器を登録して、今日から記録を始めましょう。", comment: "Onboarding description 4")
                     .font(.body)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -285,7 +292,7 @@ struct StartSlide: View {
                     hasSeenOnboarding = true
                 }
             } label: {
-                Text("はじめる")
+                Text("はじめる", comment: "Onboarding start button")
                     .fontWeight(.semibold)
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)

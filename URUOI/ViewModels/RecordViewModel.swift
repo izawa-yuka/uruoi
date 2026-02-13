@@ -83,7 +83,7 @@ final class RecordViewModel {
                 DataSyncService.shared.saveContainer(container, householdID: householdID)
             }
         } catch {
-            setError("器の情報の更新に失敗しました", error: error)
+            setError(String(localized: "器の情報の更新に失敗しました"), error: error)
         }
     }
 
@@ -133,7 +133,7 @@ final class RecordViewModel {
             // Sync
             syncRecord(newRecord)
         } catch {
-            setError("記録の開始に失敗しました", error: error)
+            setError(String(localized: "記録の開始に失敗しました"), error: error)
         }
     }
     
@@ -163,7 +163,8 @@ final class RecordViewModel {
             
             if let currentRecord = activeRecords.first {
                 if endWeight > currentRecord.startWeight {
-                    setError("残量は設置時の量（\(Int(currentRecord.startWeight))g）より少なくしてください")
+                    let weight = Int(currentRecord.startWeight)
+                    setError(String(localized: "残量は設置時の量（\(weight)g）より少なくしてください"))
                     return
                 }
                 
@@ -173,7 +174,7 @@ final class RecordViewModel {
                 currentRecord.weatherCondition = weatherCondition
                 currentRecord.temperature = temperature
                 
-                var finalNote = "残量: \(Int(endWeight))g"
+                var finalNote = String(localized: "残量: \(Int(endWeight))g")
                 if let userNote = note, !userNote.isEmpty {
                     finalNote += "\n\(userNote)"
                 }
@@ -191,7 +192,7 @@ final class RecordViewModel {
                 syncRecord(currentRecord)
             }
         } catch {
-            setError("記録の終了に失敗しました", error: error)
+            setError(String(localized: "記録の終了に失敗しました"), error: error)
         }
     }
     
@@ -221,7 +222,7 @@ final class RecordViewModel {
         
         // エラーが出ていなければ開始処理へ
         if !showError {
-            let remainingNote = "残量: \(Int(endWeight))g"
+            let remainingNote = String(localized: "残量: \(Int(endWeight))g")
             startRecording(
                 container: container,
                 startWeight: nextStartWeight,
@@ -277,7 +278,7 @@ final class RecordViewModel {
             // Sync
             syncRecord(record)
         } catch {
-            setError("記録の更新に失敗しました", error: error)
+            setError(String(localized: "記録の更新に失敗しました"), error: error)
         }
     }
     
@@ -296,7 +297,7 @@ final class RecordViewModel {
         record.endWeight = newEndWeight
         
         if let endWeight = newEndWeight {
-            var finalNote = "残量: \(Int(endWeight))g"
+            var finalNote = String(localized: "残量: \(Int(endWeight))g")
             if let userNote = newNote, !userNote.isEmpty {
                 finalNote += "\n\(userNote)"
             }
@@ -314,7 +315,7 @@ final class RecordViewModel {
             // Sync
             syncRecord(record)
         } catch {
-            setError("記録の更新に失敗しました", error: error)
+            setError(String(localized: "記録の更新に失敗しました"), error: error)
         }
     }
     
@@ -337,7 +338,7 @@ final class RecordViewModel {
             // Sync
             syncDeleteRecord(id: recordID)
         } catch {
-            setError("記録の削除に失敗しました", error: error)
+            setError(String(localized: "記録の削除に失敗しました"), error: error)
         }
     }
     
@@ -352,7 +353,7 @@ final class RecordViewModel {
             self.activeRecords = try modelContext.fetch(descriptor)
             self.lastUpdateTimestamp = Date()
         } catch {
-            setError("データの取得に失敗しました", error: error)
+            setError(String(localized: "データの取得に失敗しました"), error: error)
         }
     }
     
@@ -410,18 +411,18 @@ final class RecordViewModel {
         }
         
         let diff = Date().timeIntervalSince(record.startTime)
-        let totalSeconds = Int(diff)
+        let totalSeconds = max(0, Int(diff))
         
         let days = totalSeconds / 86400
         let hours = (totalSeconds % 86400) / 3600
         let minutes = (totalSeconds % 3600) / 60
         
         if days > 0 {
-            return "\(days)日と\(hours)時間\(minutes)分経過"
+            return String(localized: "\(days)日と\(hours)時間\(minutes)分経過")
         } else if hours > 0 {
-            return "\(hours)時間\(minutes)分経過"
+            return String(localized: "\(hours)時間\(minutes)分経過")
         } else {
-            return "\(minutes)分経過"
+            return String(localized: "\(minutes)分経過")
         }
     }
     
@@ -546,11 +547,20 @@ final class RecordViewModel {
             return
         }
         
+        print("----- 🏥 健康アラート判定処理開始 -----")
+        if let amount = record.amount {
+            print("今回の記録量: \(amount)ml")
+        }
+        
         if isRecordAbnormal(record, modelContext: modelContext) {
+            print("判定結果: 🚨 異常あり -> アラートフラグON")
             self.isAlert = true
-            self.alertMessage = "直近の記録で、普段と異なる飲水量が検出されました。"
+            self.alertMessage = String(localized: "直近の記録で、普段と異なる飲水量が検出されました。")
             return
         }
+        
+        print("判定結果: ✅ 正常")
+        print("--------------------------------")
         
         self.isAlert = false
     }
@@ -605,20 +615,29 @@ final class RecordViewModel {
                 }
                 .prefix(20)
             
-            guard pastRecords.count >= 1 else { return false }
+            guard pastRecords.count >= 1 else {
+                print("   ℹ️ 比較対象データ不足 (過去\(pastRecords.count)件)")
+                return false
+            }
             
             let amounts = pastRecords.compactMap { $0.amount }
             guard !amounts.isEmpty else { return false }
             
             let average = amounts.reduce(0, +) / Double(amounts.count)
+            let lowerBound = average * 0.5
+            let upperBound = average * 1.5
             
-            if recordAmount >= average * 1.5 || recordAmount <= average * 0.5 {
+            print("   📊 平均値(直近20件): \(String(format: "%.1f", average))ml")
+            print("   ⚖️ 正常範囲: \(String(format: "%.1f", lowerBound)) 〜 \(String(format: "%.1f", upperBound))ml")
+            
+            if recordAmount >= upperBound || recordAmount <= lowerBound {
+                print("   ⚠️ 異常検出: \(recordAmount)ml (範囲外)")
                 return true
             }
             
             return false
         } catch {
-            setError("記録の異常チェックに失敗しました", error: error)
+            setError(String(localized: "記録の異常チェックに失敗しました"), error: error)
             return false
         }
     }

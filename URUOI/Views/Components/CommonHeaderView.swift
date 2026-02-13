@@ -22,7 +22,7 @@ struct CommonHeaderView: View {
             
             // テキスト情報（左揃え）
             VStack(alignment: .leading, spacing: 2) {
-                Text("平均 (7日間)")
+                Text(String(localized: "平均 (7日間)"))
                     .font(.caption)
                     .foregroundColor(.secondary)
                 
@@ -37,7 +37,7 @@ struct CommonHeaderView: View {
                         .fontWeight(.bold)
                         .foregroundColor(.secondary)
                     
-                    Text("/匹")
+                    Text(String(localized: "/匹"))
                         .font(.caption2)
                         .foregroundColor(.secondary)
                 }
