@@ -83,7 +83,7 @@ final class SettingsViewModel {
         }
         
         // 2. 現在の猫の頭数を取得
-        let catCount = AppSettings.shared.defaultCatCount
+        let catCount = AppSettings.shared.numberOfPets
         
         // 3. 過去14日間のダミーデータを生成
         let calendar = Calendar.current

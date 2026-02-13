@@ -19,7 +19,7 @@ struct ContainerDetailView: View {
     @State private var showingEditSheet = false
     @State private var editedName: String = ""
     @State private var editedEmptyWeight: String = ""
-    @AppStorage("defaultCatCount") private var catCount: Int = 2
+    @AppStorage("numberOfPets") private var catCount: Int = 1
     @State private var historyViewModel = HistoryViewModel()
     @State private var settingsViewModel = SettingsViewModel()
     

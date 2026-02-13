@@ -15,7 +15,7 @@ struct AnalysisView: View {
     
     // 設定と連動（課金状態）
     @AppStorage("isProMember") private var isProMember: Bool = false
-    @AppStorage("defaultCatCount") private var defaultCatCount: Int = 2
+    @AppStorage("numberOfPets") private var numberOfPets: Int = 1
     
     @State private var showingPremiumIntro = false
     
@@ -97,7 +97,7 @@ struct AnalysisView: View {
             }
             .onChange(of: viewModel.selectedPeriod) { _, _ in updateAllData() }
             .onChange(of: viewModel.currentDate) { _, _ in updateAllData() }
-            .onChange(of: defaultCatCount) { _, _ in updateAllData() }
+            .onChange(of: numberOfPets) { _, _ in updateAllData() }
             
             .sheet(isPresented: $showingPremiumIntro) {
                 PremiumIntroductionView()
@@ -108,8 +108,8 @@ struct AnalysisView: View {
     private func updateAllData() {
         DispatchQueue.main.async {
             self.cachedPeriodData = viewModel.calculatePeriodIntake(records: records, modelContext: modelContext)
-            self.cachedPeriodAverage = viewModel.calculatePeriodAverage(data: self.cachedPeriodData, catCount: defaultCatCount)
-            self.cachedPreviousAverage = viewModel.calculatePreviousPeriodAverage(records: records, modelContext: modelContext, catCount: defaultCatCount)
+            self.cachedPeriodAverage = viewModel.calculatePeriodAverage(data: self.cachedPeriodData, catCount: numberOfPets)
+            self.cachedPreviousAverage = viewModel.calculatePreviousPeriodAverage(records: records, modelContext: modelContext, catCount: numberOfPets)
         }
     }
     

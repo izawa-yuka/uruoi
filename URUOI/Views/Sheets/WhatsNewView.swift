@@ -18,27 +18,15 @@ struct WhatsNewView: View {
                     // 新機能リスト
                     VStack(alignment: .leading, spacing: 30) {
                         featureRow(
-                            icon: "globe",
-                            title: "英語対応",
-                            description: "アプリの言語が英語表示に対応しました。端末の設定に合わせて自動で切り替わります。"
-                        )
-                        
-                        featureRow(
-                            icon: "person.2.fill", // 共有アイコン
-                            title: "共有機能の強化",
-                            description: "相手が水を換えた時に通知が届くようになりました。また、履歴画面で「相手の記録」がひと目で分かります。"
-                        )
-                        
-                        featureRow(
-                            icon: "pawprint.fill", // 猫の足跡アイコン
+                            icon: "pawprint.fill",
                             title: "頭数設定の追加",
-                            description: "設定画面から猫ちゃんの頭数を登録できるようになりました。1匹あたりの平均飲水量の計算に使われます。"
+                            description: "設定画面からペットの頭数を登録できるようになりました。1匹あたりの平均飲水量の計算に使われます。"
                         )
                         
                         featureRow(
-                            icon: "hammer.fill", // 修復・安定性向上をイメージ
-                            title: "安定性の向上",
-                            description: "履歴を削除する際にアプリが終了してしまう不具合など、細かな修正を行いました。"
+                            icon: "wrench.and.screwdriver.fill",
+                            title: "不具合の修正",
+                            description: "平均値の計算が正しく反映されない問題や、履歴削除時の不具合などを修正しました。"
                         )
                     }
                     .padding(.horizontal, 24)

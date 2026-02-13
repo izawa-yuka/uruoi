@@ -491,7 +491,7 @@ final class RecordViewModel {
             }
             
             let totalAmount = dailyTotals.values.reduce(0, +)
-            let catCount = AppSettings.shared.defaultCatCount
+            let catCount = AppSettings.shared.numberOfPets
             
             self.weeklyAveragePerCat = catCount > 0 ? totalAmount / 7.0 / Double(catCount) : 0
             
@@ -516,7 +516,7 @@ final class RecordViewModel {
         do {
             let records = try modelContext.fetch(descriptor)
             let totalAmount = records.reduce(0.0) { $0 + ($1.amount ?? 0) }
-            let catCount = AppSettings.shared.defaultCatCount
+            let catCount = AppSettings.shared.numberOfPets
             self.todayTotalPerCat = catCount > 0 ? totalAmount / Double(catCount) : 0
         } catch {
             print("今日の合計の計算に失敗: \(error)")

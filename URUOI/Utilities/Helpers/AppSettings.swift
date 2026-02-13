@@ -14,7 +14,7 @@ final class AppSettings {
     static let shared = AppSettings()
     
     @ObservationIgnored
-    @AppStorage("defaultCatCount") var defaultCatCount: Int = 2
+    @AppStorage("numberOfPets") var numberOfPets: Int = 1
     
     @ObservationIgnored
     @AppStorage("alertThreshold") var alertThreshold: Int = 50 // ml
