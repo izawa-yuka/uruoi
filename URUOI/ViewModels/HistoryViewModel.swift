@@ -169,19 +169,25 @@ final class HistoryViewModel {
         return result
     }
     
-    func calculatePeriodAverage(data: [PeriodIntakeData], catCount: Int) -> Double {
-        guard !data.isEmpty, catCount > 0 else { return 0 }
+    private var savedPetCount: Int {
+        let count = UserDefaults.standard.integer(forKey: "numberOfPets")
+        return count > 0 ? count : 1
+    }
+
+    func calculatePeriodAverage(data: [PeriodIntakeData]) -> Double {
+        let count = savedPetCount
+        guard !data.isEmpty else { return 0 }
         let totalAmount = data.reduce(0) { $0 + $1.totalAmount }
         let averagePerUnit = totalAmount / Double(data.count)
-        return averagePerUnit / Double(catCount)
+        return averagePerUnit / Double(count)
     }
     
-    func calculatePreviousPeriodAverage(records: [WaterRecord], modelContext: ModelContext, catCount: Int) -> Double {
+    func calculatePreviousPeriodAverage(records: [WaterRecord], modelContext: ModelContext) -> Double {
         let originalDate = currentDate
         let prevDate = calendar.date(byAdding: dateComponentForPeriod, value: -1, to: currentDate) ?? currentDate
         self.currentDate = prevDate
         let prevData = calculatePeriodIntake(records: records, modelContext: modelContext)
-        let average = calculatePeriodAverage(data: prevData, catCount: catCount)
+        let average = calculatePeriodAverage(data: prevData)
         self.currentDate = originalDate
         return average
     }

@@ -108,8 +108,8 @@ struct AnalysisView: View {
     private func updateAllData() {
         DispatchQueue.main.async {
             self.cachedPeriodData = viewModel.calculatePeriodIntake(records: records, modelContext: modelContext)
-            self.cachedPeriodAverage = viewModel.calculatePeriodAverage(data: self.cachedPeriodData, catCount: numberOfPets)
-            self.cachedPreviousAverage = viewModel.calculatePreviousPeriodAverage(records: records, modelContext: modelContext, catCount: numberOfPets)
+            self.cachedPeriodAverage = viewModel.calculatePeriodAverage(data: self.cachedPeriodData)
+            self.cachedPreviousAverage = viewModel.calculatePreviousPeriodAverage(records: records, modelContext: modelContext)
         }
     }
     
