@@ -175,6 +175,24 @@ struct SettingsView: View {
                     }
                 }
                 
+                // MARK: - レビューで応援
+                Section {
+                    Button {
+                        UIApplication.shared.open(AppConfig.reviewURL)
+                    } label: {
+                        HStack {
+                            Image(systemName: "star.fill")
+                                .foregroundStyle(.yellow)
+                            Text(String(localized: "レビューを書いて応援する"))
+                                .foregroundStyle(.primary)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+                
                 // MARK: - サポート
                 Section(String(localized: "サポート")) {
                     Link(String(localized: "よくある質問"), destination: AppConfig.faqURL)

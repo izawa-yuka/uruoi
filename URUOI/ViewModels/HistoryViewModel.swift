@@ -20,6 +20,16 @@ struct TimelineItem: Identifiable {
     let weather: String? // SF Symbol名
     let temperature: Double?
     let recordID: PersistentIdentifier // 元のWaterRecordのID
+    let createdByDeviceID: String? // 記録を作成したデバイスID
+    
+    /// 家族（自分以外）が作成した記録かどうか
+    /// - `createdByDeviceID` が nil の場合は既存データなので「自分」として扱う
+    var isFamilyRecord: Bool {
+        guard let deviceID = createdByDeviceID, !deviceID.isEmpty else {
+            return false // nil または空文字 = 既存データ or 自分の記録
+        }
+        return deviceID != DeviceManager.currentDeviceID
+    }
     
     enum TimelineItemType {
         case setup
@@ -217,7 +227,8 @@ final class HistoryViewModel {
                 amount: nil,
                 weather: nil,
                 temperature: nil,
-                recordID: record.id
+                recordID: record.id,
+                createdByDeviceID: record.createdByDeviceID
             )
             items.append(setupItem)
             
@@ -232,7 +243,8 @@ final class HistoryViewModel {
                     amount: record.amount,
                     weather: record.weatherCondition,
                     temperature: record.temperature,
-                    recordID: record.id
+                    recordID: record.id,
+                    createdByDeviceID: record.createdByDeviceID
                 )
                 items.append(collectionItem)
             }

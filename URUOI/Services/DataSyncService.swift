@@ -183,6 +183,7 @@ final class DataSyncService {
                         existingRecord.note = firestoreRecord.note
                         existingRecord.containerID = containerUUID
                         existingRecord.container = container
+                        existingRecord.createdByDeviceID = firestoreRecord.createdByDeviceID
                     } else {
                         // 新規作成
                         let newRecord = WaterRecord(
@@ -196,7 +197,8 @@ final class DataSyncService {
                             weatherCondition: firestoreRecord.weatherCondition,
                             temperature: firestoreRecord.temperature,
                             note: firestoreRecord.note,
-                            container: container
+                            container: container,
+                            createdByDeviceID: firestoreRecord.createdByDeviceID
                         )
                         context.insert(newRecord)
                     }

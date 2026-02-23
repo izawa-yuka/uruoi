@@ -44,6 +44,7 @@ struct FirestoreRecord: Codable, Identifiable {
     let weatherCondition: String?
     let temperature: Double?
     let note: String?
+    let createdByDeviceID: String? // 記録を作成したデバイスID（家族共有で使用）
     
     // SwiftDataのモデルから変換するためのイニシャライザ
     init(from record: WaterRecord) {
@@ -57,5 +58,6 @@ struct FirestoreRecord: Codable, Identifiable {
         self.weatherCondition = record.weatherCondition
         self.temperature = record.temperature
         self.note = record.note
+        self.createdByDeviceID = record.createdByDeviceID
     }
 }

@@ -88,6 +88,7 @@ final class WaterRecord: Identifiable {
     var weatherCondition: String? // SF Symbol名: "sun.max", "cloud.rain"など
     var temperature: Double? // 摂氏温度
     var note: String? // メモ（50文字以内）
+    var createdByDeviceID: String? // 記録を作成したデバイスのID（家族共有で使用）
     
     // SwiftDataリレーションシップ: このレコードが属するコンテナ
     var container: ContainerMaster?
@@ -115,7 +116,8 @@ final class WaterRecord: Identifiable {
         weatherCondition: String? = nil,
         temperature: Double? = nil,
         note: String? = nil,
-        container: ContainerMaster? = nil
+        container: ContainerMaster? = nil,
+        createdByDeviceID: String? = DeviceManager.currentDeviceID
     ) {
         self.id = id
         self.containerID = containerID
@@ -128,6 +130,7 @@ final class WaterRecord: Identifiable {
         self.temperature = temperature
         self.note = note
         self.container = container
+        self.createdByDeviceID = createdByDeviceID
     }
     
     // MARK: - バリデーション

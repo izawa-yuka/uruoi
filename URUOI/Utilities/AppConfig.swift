@@ -13,4 +13,8 @@ struct AppConfig {
     
     // お問い合わせ
     static let supportURL = URL(string: "https://docs.google.com/forms/d/e/1FAIpQLSe0Xdk_P7sMJupxluDGtE-YrroVIKzi3DHetZ65MTQ8KzWS6A/viewform?usp=dialog")!
+    
+    // レビュー（App Store）
+    // ※ YOUR_APP_ID を App Store Connect で確認した数字に置き換えてください
+    static let reviewURL = URL(string: "https://apps.apple.com/app/id6741486724?action=write-review")!
 }

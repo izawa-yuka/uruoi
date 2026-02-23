@@ -139,12 +139,22 @@ struct TimelineRow: View {
                     .font(.title3)
                 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(item.containerName)
-                        .font(.body)
-                        .fontWeight(.medium)
-                        .foregroundColor(.primary)
-                        .lineLimit(1)
-                        .truncationMode(.tail)
+                    HStack(spacing: 4) {
+                        Text(item.containerName)
+                            .font(.body)
+                            .fontWeight(.medium)
+                            .foregroundColor(.primary)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                        
+                        // 家族（自分以外）が作成した記録にはアイコンを表示
+                        // createdByDeviceID が nil でなく、自身のIDと異なる場合のみ表示
+                        if item.isFamilyRecord {
+                            Image(systemName: "person.crop.circle")
+                                .imageScale(.medium)
+                                .foregroundColor(.secondary)
+                        }
+                    }
                     
                     HStack(spacing: 6) {
                         Text(item.type == .setup ? "新規設置" : "回収")
