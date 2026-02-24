@@ -16,5 +16,5 @@ struct AppConfig {
     
     // レビュー（App Store）
     // ※ YOUR_APP_ID を App Store Connect で確認した数字に置き換えてください
-    static let reviewURL = URL(string: "https://apps.apple.com/app/id6741486724?action=write-review")!
+    static let reviewURL = URL(string: "https://apps.apple.com/app/id6757776163?action=write-review")!
 }

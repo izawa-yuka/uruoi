@@ -18,15 +18,15 @@ struct WhatsNewView: View {
                     // 新機能リスト
                     VStack(alignment: .leading, spacing: 30) {
                         featureRow(
-                            icon: "pawprint.fill",
-                            title: "頭数設定の追加",
-                            description: "設定画面からペットの頭数を登録できるようになりました。1匹あたりの平均飲水量の計算に使われます。"
+                            icon: "person.2.fill",
+                            title: "家族の記録がわかりやすく",
+                            description: "家族共有機能をお使いの際、自分以外が追加した記録にアイコンが表示され、ひと目で判別できるようになりました。"
                         )
                         
                         featureRow(
-                            icon: "wrench.and.screwdriver.fill",
-                            title: "不具合の修正",
-                            description: "平均値の計算が正しく反映されない問題や、履歴削除時の不具合などを修正しました。"
+                            icon: "star.fill",
+                            title: "レビューのお願い",
+                            description: "設定タブにストアへのリンクを追加しました。今後の開発の励みになりますので、使い心地などぜひレビューでお聞かせください！"
                         )
                     }
                     .padding(.horizontal, 24)

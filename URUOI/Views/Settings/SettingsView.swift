@@ -286,6 +286,12 @@ struct SettingsView: View {
                         NotificationManager.shared.debugSendHealthAlert(currentAmount: 150, threshold: healthAlertThreshold)
                     }
                     .foregroundColor(.orange)
+                    
+                    Button("新機能モーダルの表示フラグをリセット") {
+                        UserDefaults.standard.removeObject(forKey: "savedAppVersion")
+                        print("🟢 [Debug] savedAppVersion を削除しました。次回起動時に新機能モーダルが表示されます。")
+                    }
+                    .foregroundColor(.purple)
                 }
                 #endif
             }
