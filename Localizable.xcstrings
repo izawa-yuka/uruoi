@@ -372,6 +372,12 @@
         }
       }
     },
+    "アップデートする" : {
+
+    },
+    "アップデートのお知らせ" : {
+
+    },
     "アプリについて" : {
       "localizations" : {
         "en" : {
@@ -1599,6 +1605,9 @@
         }
       }
     },
+    "後で" : {
+
+    },
     "復元完了" : {
       "localizations" : {
         "en" : {
@@ -1628,6 +1637,9 @@
           }
         }
       }
+    },
+    "新しいバージョンのURUOIが利用可能です。ストアからアップデートをお願いします。" : {
+
     },
     "新しい水の重さ (任意)" : {
       "comment" : "A label for the optional weight of the water at the start of the next recording.",

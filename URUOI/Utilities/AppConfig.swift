@@ -15,6 +15,11 @@ struct AppConfig {
     static let supportURL = URL(string: "https://docs.google.com/forms/d/e/1FAIpQLSe0Xdk_P7sMJupxluDGtE-YrroVIKzi3DHetZ65MTQ8KzWS6A/viewform?usp=dialog")!
     
     // レビュー（App Store）
-    // ※ YOUR_APP_ID を App Store Connect で確認した数字に置き換えてください
     static let reviewURL = URL(string: "https://apps.apple.com/app/id6757776163?action=write-review")!
+    
+    // ストア画面への遷移URL（アップデート用）
+    static let storeURL = URL(string: "https://apps.apple.com/app/id6757776163")!
+    
+    // アップデートチェックAPI（iTunes Lookup）
+    static let updateCheckAPIURL = URL(string: "https://itunes.apple.com/jp/lookup?id=6757776163")!
 }

@@ -15,6 +15,7 @@ struct ContentView: View {
     // 共有用ID
     @AppStorage("householdID") private var householdID: String = ""
     @State private var showWhatsNew = false
+    @State private var showUpdateAlert = false
 
     var body: some View {
         // スプラッシュ画面を削除し、直接メイン画面へ遷移
@@ -26,6 +27,17 @@ struct ContentView: View {
             // メインタブView
             mainTabView
                 .transition(.opacity)
+                .task {
+                    // UpdateCheckerによるApp Storeの最新バージョン確認
+                    do {
+                        let hasUpdate = try await UpdateChecker.checkUpdate()
+                        if hasUpdate {
+                            showUpdateAlert = true
+                        }
+                    } catch {
+                        print("App Store update check failed: \(error)")
+                    }
+                }
                 .onAppear {
                     // アプリ起動時にIDがあれば同期開始
                     if !householdID.isEmpty {
@@ -47,6 +59,15 @@ struct ContentView: View {
                     WhatsNewView {
                         updateSavedVersion()
                     }
+                }
+                .alert("アップデートのお知らせ", isPresented: $showUpdateAlert) {
+                    Button("アップデートする") {
+                        // プライマリボタン押下時に、AppConfigで指定した正しいIDを使用したストア画面へ遷移
+                        UIApplication.shared.open(AppConfig.storeURL)
+                    }
+                    Button("後で", role: .cancel) { }
+                } message: {
+                    Text("新しいバージョンのURUOIが利用可能です。ストアからアップデートをお願いします。")
                 }
         }
     }
