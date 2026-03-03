@@ -19,15 +19,19 @@ struct HistoryView: View {
     @State private var viewModel = HistoryViewModel()
     @State private var recordViewModel = RecordViewModel()
     
-    // TimelineItemの配列に変換
+    // TimelineItemの配列に変換（ソート済み）
     private var timelineItems: [TimelineItem] {
         viewModel.convertToTimelineItems(records: records, modelContext: modelContext)
     }
     
-    // 日付ごとにグループ化
+    // 日付ごとにグループ化（各グループ内もソート済み）
     private var groupedItems: [String: [TimelineItem]] {
-        Dictionary(grouping: timelineItems) { item in
+        let grouped = Dictionary(grouping: timelineItems) { item in
             viewModel.formatDate(item.date)
+        }
+        // 各グループ内を日時の降順で明示的にソート
+        return grouped.mapValues { items in
+            items.sorted { $0.date > $1.date }
         }
     }
     
@@ -83,6 +87,8 @@ struct HistoryView: View {
                     .listStyle(.insetGrouped)
                     .scrollContentBackground(.hidden)
                     .background(Color.backgroundGray)
+                    // recordsの変更を確実にListに反映させる
+                    .id(records.count)
                 }
             }
             .background(Color.backgroundGray) // 背景色を全体に適用

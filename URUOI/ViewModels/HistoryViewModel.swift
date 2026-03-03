@@ -211,15 +211,22 @@ final class HistoryViewModel {
     }
     
     // MARK: - タイムライン変換 (履歴画面用)
+    
     func convertToTimelineItems(records: [WaterRecord], modelContext: ModelContext) -> [TimelineItem] {
         var items: [TimelineItem] = []
         for record in records {
             // コンテナ名を取得（削除されている場合などを考慮）
             let containerName = record.container?.name ?? String(localized: "不明な容器")
             
+            // 安定したIDを生成
+            // 毎回UUID()を新規生成するとSwiftUIの差分検出が不安定になるため、
+            // containerID（UUID型）とstartTime（Date型）から決定的にIDを生成する
+            let baseKey = "\(record.containerID.uuidString)-\(record.startTime.timeIntervalSince1970)"
+            let setupID = stableUUID(from: baseKey + "-setup")
+            
             // 設置レコード
             let setupItem = TimelineItem(
-                id: UUID(),
+                id: setupID,
                 date: record.startTime,
                 type: .setup,
                 weight: record.startWeight,
@@ -234,8 +241,10 @@ final class HistoryViewModel {
             
             // 回収レコード（存在する場合）
             if let endTime = record.endTime {
+                let collectionID = stableUUID(from: baseKey + "-collection")
+                
                 let collectionItem = TimelineItem(
-                    id: UUID(),
+                    id: collectionID,
                     date: endTime,
                     type: .collection,
                     weight: record.endWeight ?? 0,
@@ -250,6 +259,35 @@ final class HistoryViewModel {
             }
         }
         return items.sorted { $0.date > $1.date }
+    }
+    
+    /// 文字列キーから安定したUUIDを生成する（決定的：同じ入力 → 同じ出力）
+    private func stableUUID(from key: String) -> UUID {
+        // djb2ハッシュアルゴリズムで文字列から決定的なハッシュ値を生成
+        var hash: UInt64 = 5381
+        for char in key.utf8 {
+            hash = ((hash << 5) &+ hash) &+ UInt64(char)
+        }
+        let hash2 = hash &* 6364136223846793005 &+ 1442695040888963407
+        
+        return UUID(uuid: (
+            UInt8(truncatingIfNeeded: hash >> 56),
+            UInt8(truncatingIfNeeded: hash >> 48),
+            UInt8(truncatingIfNeeded: hash >> 40),
+            UInt8(truncatingIfNeeded: hash >> 32),
+            UInt8(truncatingIfNeeded: hash >> 24),
+            UInt8(truncatingIfNeeded: hash >> 16),
+            UInt8(truncatingIfNeeded: hash >> 8),
+            UInt8(truncatingIfNeeded: hash),
+            UInt8(truncatingIfNeeded: hash2 >> 56),
+            UInt8(truncatingIfNeeded: hash2 >> 48),
+            UInt8(truncatingIfNeeded: hash2 >> 40),
+            UInt8(truncatingIfNeeded: hash2 >> 32),
+            UInt8(truncatingIfNeeded: hash2 >> 24),
+            UInt8(truncatingIfNeeded: hash2 >> 16),
+            UInt8(truncatingIfNeeded: hash2 >> 8),
+            UInt8(truncatingIfNeeded: hash2)
+        ))
     }
     
     // MARK: - ヘルパー

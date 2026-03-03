@@ -7,26 +7,48 @@ struct WhatsNewView: View {
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
-                VStack(spacing: 40) {
+                VStack(spacing: 0) {
                     // タイトル
-                    Text("新機能のお知らせ")
-                        .font(.largeTitle)
+                    Text("アップデートのお知らせ")
+                        .font(.title) // 文字サイズを調整して収まりやすく
                         .fontWeight(.bold)
-                        .padding(.top, 60)
+                        .padding(.top, 50)
                         .multilineTextAlignment(.center)
                     
-                    // 新機能リスト
-                    VStack(alignment: .leading, spacing: 30) {
+                    // はじめの挨拶
+                    Text("いつもURUOIをご利用いただきありがとうございます\n今回のアップデート内容は以下の通りです。")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(4)
+                        .padding(.top, 16)
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 32)
+                    
+                    // アップデート内容リスト
+                    VStack(alignment: .leading, spacing: 28) {
                         featureRow(
-                            icon: "person.2.fill",
-                            title: "家族の記録がわかりやすく",
-                            description: "家族共有機能をお使いの際、自分以外が追加した記録にアイコンが表示され、ひと目で判別できるようになりました。"
+                            icon: "person.crop.circle.fill", // 👤 家族の記録アイコン（履歴画面と同じ系統）
+                            title: "家族の記録アイコンを追加",
+                            description: "家族共有をご利用の際、自分以外が追加した記録にアイコンが付き、誰が記録したかひと目でわかるようになりました。"
                         )
                         
                         featureRow(
-                            icon: "star.fill",
+                            icon: "bandage.fill", // 🩹 不具合修正（虫から絆創膏へ変更）
+                            title: "履歴画面の不具合を修正",
+                            description: "履歴のデータが順不同に表示される、または一部反映されないことがある問題を修正し、常に最新の記録が正確に並ぶよう改善しました。"
+                        )
+                        
+                        featureRow(
+                            icon: "star.fill", // ⭐️ レビューのお願い
                             title: "レビューのお願い",
-                            description: "設定タブにストアへのリンクを追加しました。今後の開発の励みになりますので、使い心地などぜひレビューでお聞かせください！"
+                            description: "設定タブからストアのレビュー画面へ直接アクセスできるようになりました。今後の開発の励みになりますので、使い心地などぜひお聞かせください！"
+                        )
+                        
+                        featureRow(
+                            icon: "wrench.adjustable.fill", // 🔧 軽微な修正
+                            title: "その他の改善",
+                            description: "その他、軽微な修正と動作の安定性向上を行いました。"
                         )
                     }
                     .padding(.horizontal, 24)
