@@ -62,7 +62,7 @@ struct PremiumIntroductionView: View {
                         Text("もっと！URUOI プラン")
                             .font(.largeTitle)
                             .fontWeight(.bold)
-                            .foregroundColor(.primary)
+                            .foregroundColor(.appMain)
                         
                         Text("愛猫の健康変化にいち早く気づこう")
                             .font(.body)
@@ -134,11 +134,11 @@ struct PremiumIntroductionView: View {
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("ずっと！URUOIプラン")
                                     .font(.headline)
-                                    .foregroundColor(.primary)
+                                    .foregroundColor(.appMain)
                                 
                                 HStack(alignment: .firstTextBaseline, spacing: 4) {
                                     Text("¥8,000")
-                                        .font(.title2)
+                                        .font(.title)
                                         .fontWeight(.bold)
                                         .foregroundColor(.appMain)
                                     
@@ -273,30 +273,25 @@ struct PlanCard: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(planType.period)
                             .font(.headline)
-                            .foregroundColor(.primary)
+                            .foregroundColor(.appMain)
                         
-                        // 価格表示（年間プランは月額換算を強調）
+                        // 価格表示（実際の決済総額を最も目立たせる）
                         if let monthlyEquivalent = planType.monthlyEquivalent {
-                            // 年間プラン: 月額換算を大きく表示
+                            // 年間プラン: 実際の決済総額（年額）を大きく表示
                             VStack(alignment: .leading, spacing: 4) {
-                                HStack(alignment: .firstTextBaseline, spacing: 4) {
-                                    Text(monthlyEquivalent)
-                                        .font(.title)
-                                        .fontWeight(.bold)
-                                        .foregroundColor(.appMain)
-                                    Text("/ 月")
-                                        .font(.subheadline)
-                                        .foregroundColor(.secondary)
-                                }
+                                Text(planType.price)
+                                    .font(.title)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.appMain)
                                 
-                                Text("年額 \(planType.price)")
+                                Text("月額換算 \(monthlyEquivalent)")
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                             }
                         } else {
                             // 月額プラン: そのまま表示
                             Text(planType.price)
-                                .font(.title2)
+                                .font(.title)
                                 .fontWeight(.bold)
                                 .foregroundColor(.appMain)
                         }
@@ -350,7 +345,7 @@ struct FeatureRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.headline)
-                    .foregroundColor(.primary)
+                    .foregroundColor(.appMain)
                 
                 Text(description)
                     .font(.subheadline)

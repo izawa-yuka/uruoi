@@ -24,10 +24,15 @@ struct HistoryView: View {
         viewModel.convertToTimelineItems(records: records, modelContext: modelContext)
     }
     
-    // 日付ごとにグループ化（各グループ内もソート済み）
-    private var groupedItems: [String: [TimelineItem]] {
+    // 日付の「日の開始」を取得するヘルパー
+    private func startOfDay(for date: Date) -> Date {
+        Calendar.current.startOfDay(for: date)
+    }
+    
+    // 日付ごとにグループ化（Dateをキーに使い、Dictionaryの順序に依存しない）
+    private var groupedItems: [Date: [TimelineItem]] {
         let grouped = Dictionary(grouping: timelineItems) { item in
-            viewModel.formatDate(item.date)
+            startOfDay(for: item.date)
         }
         // 各グループ内を日時の降順で明示的にソート
         return grouped.mapValues { items in
@@ -35,15 +40,9 @@ struct HistoryView: View {
         }
     }
     
-    // 日付のソート済みキー（新しい順）
-    private var sortedDates: [String] {
-        groupedItems.keys.sorted { date1, date2 in
-            guard let d1 = parseDate(date1),
-                  let d2 = parseDate(date2) else {
-                return false
-            }
-            return d1 > d2
-        }
+    // 日付のソート済みキー（新しい順）— Dateで直接比較するため確実
+    private var sortedDates: [Date] {
+        groupedItems.keys.sorted { $0 > $1 }
     }
     
     var body: some View {
@@ -74,7 +73,7 @@ struct HistoryView: View {
                 } else {
                     List {
                         ForEach(sortedDates, id: \.self) { date in
-                            Section(header: Text(date)) {
+                            Section(header: Text(viewModel.formatDate(date))) {
                                 ForEach(groupedItems[date] ?? []) { item in
                                     TimelineRow(item: item, viewModel: viewModel)
                                 }
@@ -118,9 +117,7 @@ struct HistoryView: View {
         }
     }
     
-    private func parseDate(_ dateString: String) -> Date? {
-        DateFormatter.japaneseDate.date(from: dateString)
-    }
+
 }
 
 // MARK: - TimelineRow
