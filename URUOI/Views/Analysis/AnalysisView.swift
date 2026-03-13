@@ -18,6 +18,7 @@ struct AnalysisView: View {
     @AppStorage("numberOfPets") private var numberOfPets: Int = 1
     
     @State private var showingPremiumIntro = false
+    @State private var showingReportSheet = false
     
     // 計算結果を保持する変数
     @State private var cachedPeriodData: [PeriodIntakeData] = []
@@ -62,10 +63,26 @@ struct AnalysisView: View {
         NavigationStack {
             VStack(spacing: 0) {
                 // ▼▼▼ 修正点1: ヘッダーを左寄せに変更（他のタブと統一） ▼▼▼
-                HStack {
+                HStack(alignment: .bottom) {
                     CommonHeaderView(weeklyAveragePerCat: recordViewModel.weeklyAveragePerCat)
                         .id("header-\(recordViewModel.lastUpdateTimestamp.timeIntervalSince1970)")
                     Spacer()
+                    Button {
+                        showingReportSheet = true
+                    } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: "doc.text")
+                                .font(.caption)
+                            Text(String(localized: "PDFデータ作成"))
+                                .font(.caption)
+                                .fontWeight(.bold)
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(Color.appMain)
+                        .cornerRadius(.buttonCornerRadius)
+                    }
                 }
                 .padding(.horizontal)
                 .padding(.top, 16)
@@ -101,6 +118,9 @@ struct AnalysisView: View {
             
             .sheet(isPresented: $showingPremiumIntro) {
                 PremiumIntroductionView()
+            }
+            .sheet(isPresented: $showingReportSheet) {
+                ReportPeriodSheet()
             }
         }
     }
@@ -150,11 +170,12 @@ struct AnalysisView: View {
             if periodData.isEmpty {
                 emptyChart
             } else {
+                let isUnlocked = isProMember || viewModel.selectedPeriod == .week
                 ZStack {
-                    chart.blur(radius: isProMember ? 0 : 10)
-                    if !isProMember { ProLockOverlay(showingPremiumIntro: $showingPremiumIntro) }
+                    chart.blur(radius: isUnlocked ? 0 : 10)
+                    if !isUnlocked { ProLockOverlay(showingPremiumIntro: $showingPremiumIntro) }
                 }
-                .onTapGesture { if !isProMember { showingPremiumIntro = true } }
+                .onTapGesture { if !isUnlocked { showingPremiumIntro = true } }
             }
         }
         .padding(.vertical)
