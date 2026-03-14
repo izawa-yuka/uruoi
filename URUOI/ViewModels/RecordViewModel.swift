@@ -526,43 +526,61 @@ final class RecordViewModel {
     
     func checkHealthAlert(using modelContext: ModelContext) {
         if isAlertDismissed { return }
-        
-        // 修正: endTime (Optional) でのソートを startTime (Non-Optional) に変更
-        // これがクラッシュの主要原因だった可能性が高い
+
         let descriptor = FetchDescriptor<WaterRecord>(
             predicate: #Predicate { $0.endTime != nil },
             sortBy: [SortDescriptor(\.startTime, order: .reverse)]
         )
-        var latestRecord: WaterRecord? = nil
-        
+
         do {
             let records = try modelContext.fetch(descriptor)
-            latestRecord = records.first
+
+            guard let latestRecord = records.first else {
+                self.isAlert = false
+                return
+            }
+
+            print("----- 🏥 健康アラート判定処理開始 -----")
+            if let amount = latestRecord.amount {
+                print("今回の記録量: \(amount)ml")
+            }
+
+            if isRecordAbnormal(latestRecord, modelContext: modelContext) {
+                if isRecordLow(latestRecord, modelContext: modelContext) {
+                    // 少なすぎる場合：連続して少ない記録がある場合のみアラート
+                    let previousRecords = records.dropFirst().filter { $0.endTime != nil }
+                    if let previousRecord = previousRecords.first,
+                       isRecordLow(previousRecord, modelContext: modelContext) {
+                        print("判定結果: 🚨 連続して少ない -> アラートフラグON")
+                        self.isAlert = true
+                        self.alertMessage = String(localized: "直近の記録で、普段と異なる飲水量が検出されました。")
+                        return
+                    }
+                    print("判定結果: ✅ 1回だけ少ない（アラートなし）")
+                } else {
+                    // 多すぎる場合：1回で即アラート
+                    print("判定結果: 🚨 異常あり（多すぎ）-> アラートフラグON")
+                    self.isAlert = true
+                    self.alertMessage = String(localized: "直近の記録で、普段と異なる飲水量が検出されました。")
+                    return
+                }
+            }
+
+            // 今日の合計が週間平均と比較して大幅に少ない場合にアラート
+            if weeklyAveragePerCat > 0 && todayTotalPerCat > 0 && todayTotalPerCat < weeklyAveragePerCat * 0.5 {
+                print("判定結果: 🚨 今日の合計が少ない -> アラートフラグON")
+                self.isAlert = true
+                self.alertMessage = String(localized: "今日の飲水量の合計が、普段より少なくなっています。")
+                return
+            }
+
+            print("判定結果: ✅ 正常")
+            print("--------------------------------")
+            self.isAlert = false
+
         } catch {
             return
         }
-        
-        guard let record = latestRecord else {
-            self.isAlert = false
-            return
-        }
-        
-        print("----- 🏥 健康アラート判定処理開始 -----")
-        if let amount = record.amount {
-            print("今回の記録量: \(amount)ml")
-        }
-        
-        if isRecordAbnormal(record, modelContext: modelContext) {
-            print("判定結果: 🚨 異常あり -> アラートフラグON")
-            self.isAlert = true
-            self.alertMessage = String(localized: "直近の記録で、普段と異なる飲水量が検出されました。")
-            return
-        }
-        
-        print("判定結果: ✅ 正常")
-        print("--------------------------------")
-        
-        self.isAlert = false
     }
     
     func dismissAlert() {
@@ -642,6 +660,33 @@ final class RecordViewModel {
         }
     }
     
+    /// 1回の記録が平均の半分以下（少なすぎ）かどうかを判定する
+    private func isRecordLow(_ record: WaterRecord, modelContext: ModelContext) -> Bool {
+        guard let recordAmount = record.amount else { return false }
+        let recordID = record.id
+        let targetContainerID = record.containerID
+
+        let descriptor = FetchDescriptor<WaterRecord>(
+            predicate: #Predicate { $0.containerID == targetContainerID },
+            sortBy: [SortDescriptor(\.startTime, order: .reverse)]
+        )
+
+        do {
+            let allRecords = try modelContext.fetch(descriptor)
+            let pastAmounts = allRecords
+                .filter { $0.endTime != nil && $0.id != recordID }
+                .compactMap { $0.amount }
+                .filter { $0 > 0 }
+                .prefix(20)
+
+            guard pastAmounts.count >= 1 else { return false }
+            let average = pastAmounts.reduce(0, +) / Double(pastAmounts.count)
+            return recordAmount <= average * 0.5
+        } catch {
+            return false
+        }
+    }
+
     func triggerUIUpdate() {
         lastUpdateTimestamp = Date()
     }
