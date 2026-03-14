@@ -28,25 +28,19 @@ struct WhatsNewView: View {
                     // アップデート内容リスト
                     VStack(alignment: .leading, spacing: 28) {
                         featureRow(
-                            icon: "person.crop.circle.fill", // 👤 家族の記録アイコン（履歴画面と同じ系統）
-                            title: "家族の記録アイコンを追加",
-                            description: "家族共有をご利用の際、自分以外が追加した記録にアイコンが付き、誰が記録したかひと目でわかるようになりました。"
+                            icon: "bell.slash.fill",
+                            title: "お知らせのタイミングを改善しました",
+                            description: "これまでは、1回の記録が少ないだけでもお知らせが届いてしまうことがありました。少ない日が続いたときだけお知らせするように改善しましたので、「たまたま少なかった」だけでは通知が来なくなります。"
                         )
-                        
+
                         featureRow(
-                            icon: "bandage.fill", // 🩹 不具合修正（虫から絆創膏へ変更）
-                            title: "履歴画面の不具合を修正",
-                            description: "履歴のデータが順不同に表示される、または一部反映されないことがある問題を修正し、常に最新の記録が正確に並ぶよう改善しました。"
+                            icon: "bell.fill",
+                            title: "その日の合計でもお知らせします",
+                            description: "1回ごとの量は普通でも、今日あまり飲んでいないと感じたときにも、お知らせが届くようになりました。"
                         )
-                        
+
                         featureRow(
-                            icon: "star.fill", // ⭐️ レビューのお願い
-                            title: "レビューのお願い",
-                            description: "設定タブからストアのレビュー画面へ直接アクセスできるようになりました。今後の開発の励みになりますので、使い心地などぜひお聞かせください！"
-                        )
-                        
-                        featureRow(
-                            icon: "wrench.adjustable.fill", // 🔧 軽微な修正
+                            icon: "wrench.adjustable.fill",
                             title: "その他の改善",
                             description: "その他、軽微な修正と動作の安定性向上を行いました。"
                         )
