@@ -1,0 +1,21 @@
+# IDE
+.DS_Store
+.idea/
+*.swp
+*.swo
+
+# Dependencies
+Pods/
+.build/
+
+# Build outputs
+DerivedData/
+.xcarchive
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 他プロジェクト
+/smoke_tracks
+/flavor_tracks
