@@ -1,20 +1,20 @@
-"""毎日のタスク収集フロー - MisskeyとSlackからNotionへ"""
+"""毎日のタスク収集フロー - MisskeyとSlackからObsidianへ"""
 
 import os
-import sys
 from datetime import date, datetime, timezone
 from dotenv import load_dotenv
 
 from .misskey_client import create_misskey_client
 from .slack_client import create_slack_client
-from .notion_client import create_notion_client
-from .task_parser import load_task_keywords, is_task_post, extract_task_lines, clean_task_text
+from .ai_classifier import classify_posts, create_post_payload
+from .obsidian_writer import create_obsidian_writer
+from .task_parser import clean_task_text
 
 load_dotenv()
 
 
-def collect_from_misskey(keywords: list[str]) -> list[dict]:
-    """Misskeyからタスク投稿を収集する"""
+def collect_posts_from_misskey() -> list[dict]:
+    """Misskeyから全投稿を取得してリストで返す"""
     client = create_misskey_client()
     if not client:
         print("[Misskey] 環境変数 MISSKEY_HOST / MISSKEY_API_TOKEN が未設定のためスキップ")
@@ -26,33 +26,21 @@ def collect_from_misskey(keywords: list[str]) -> list[dict]:
     notes = client.get_my_notes(since_hours=collect_hours)
     print(f"[Misskey] {len(notes)}件の投稿を取得")
 
-    tasks = []
+    posts = []
     for note in notes:
         text = client.extract_text(note)
-        if not is_task_post(text, keywords):
+        if not text:
             continue
-
-        note_url = (
-            f"https://{os.getenv('MISSKEY_HOST')}/notes/{note['id']}"
-        )
-        task_lines = extract_task_lines(text)
-
-        for line in task_lines:
-            cleaned = clean_task_text(line)
-            if cleaned:
-                tasks.append({
-                    "title": cleaned,
-                    "source": "Misskey",
-                    "url": note_url,
-                    "created_at": note.get("createdAt", ""),
-                })
-
-    print(f"[Misskey] タスク候補: {len(tasks)}件")
-    return tasks
+        posts.append({
+            "text": clean_task_text(text),
+            "source": "Misskey",
+            "url": f"https://{os.getenv('MISSKEY_HOST')}/notes/{note['id']}",
+        })
+    return posts
 
 
-def collect_from_slack(keywords: list[str]) -> list[dict]:
-    """Slackからタスク投稿を収集する"""
+def collect_posts_from_slack() -> list[dict]:
+    """Slackから全メッセージを取得してリストで返す"""
     client = create_slack_client()
     if not client:
         print("[Slack] 環境変数 SLACK_BOT_TOKEN が未設定のためスキップ")
@@ -70,84 +58,84 @@ def collect_from_slack(keywords: list[str]) -> list[dict]:
     messages = client.get_channel_messages(channel_id=channel_id, since_hours=collect_hours)
     print(f"[Slack] {len(messages)}件のメッセージを取得")
 
-    tasks = []
+    posts = []
     for msg in messages:
         text = client.extract_text(msg)
-        if not is_task_post(text, keywords):
+        if not text:
             continue
+        posts.append({
+            "text": clean_task_text(text),
+            "source": "Slack",
+            "url": client.get_message_url(workspace, channel_id, msg.get("ts", "")),
+        })
+    return posts
 
-        msg_url = client.get_message_url(workspace, channel_id, msg.get("ts", ""))
-        task_lines = extract_task_lines(text)
 
-        for line in task_lines:
-            cleaned = clean_task_text(line)
-            if cleaned:
-                tasks.append({
-                    "title": cleaned,
-                    "source": "Slack",
-                    "url": msg_url,
-                    "created_at": msg.get("ts", ""),
-                })
+def run_ai_classification(posts: list[dict]) -> list[dict]:
+    """全投稿をClaude APIで解析し、タスクのみ返す"""
+    if not posts:
+        return []
 
-    print(f"[Slack] タスク候補: {len(tasks)}件")
+    print(f"\n[AI] {len(posts)}件の投稿を解析中...")
+
+    payloads = [create_post_payload(i, p["text"]) for i, p in enumerate(posts)]
+    results = classify_posts(payloads)
+
+    tasks = []
+    for result in results:
+        if not result.get("is_task"):
+            continue
+        original = posts[result["index"]]
+        for task in result.get("tasks", []):
+            tasks.append({
+                "title": task["title"],
+                "category": task.get("category", "その他"),
+                "source": original["source"],
+                "url": original["url"],
+            })
+
+    print(f"[AI] タスクとして判定: {len(tasks)}件")
     return tasks
 
 
-def save_to_notion(tasks: list[dict]) -> int:
-    """タスクをNotionに保存し、追加件数を返す"""
-    client = create_notion_client()
-    if not client:
-        print("[Notion] 環境変数 NOTION_API_TOKEN / NOTION_DATABASE_ID が未設定のためスキップ")
+def save_to_obsidian(tasks: list[dict]) -> int:
+    """タスクをObsidianのTasks.mdに追記し、追加件数を返す"""
+    writer = create_obsidian_writer()
+    if not writer:
+        print("[Obsidian] 環境変数 OBSIDIAN_VAULT_PATH が未設定のためスキップ")
         return 0
 
     today = date.today()
-    existing_urls = client.get_existing_urls(today)
-    print(f"[Notion] 本日すでに登録済み: {len(existing_urls)}件")
-
-    added = 0
-    skipped = 0
+    added = writer.append_tasks(tasks, today)
 
     for task in tasks:
-        url = task.get("url")
-        # 同じURLが既に登録されている場合はスキップ（重複防止）
-        if url and url in existing_urls:
-            skipped += 1
-            continue
+        print(f"  ✓ [{task['category']}] {task['title'][:50]}")
 
-        client.add_task(
-            title=task["title"],
-            source=task["source"],
-            collected_date=today,
-            source_url=url,
-        )
-        if url:
-            existing_urls.add(url)
-        added += 1
-        print(f"  ✓ [{task['source']}] {task['title'][:50]}")
-
-    print(f"[Notion] 追加: {added}件 / スキップ(重複): {skipped}件")
+    print(f"[Obsidian] 追加: {added}件")
     return added
 
 
 def main():
     print(f"=== 毎日タスク収集フロー 開始 {datetime.now(timezone.utc).isoformat()} ===")
 
-    keywords = load_task_keywords()
-    print(f"収集キーワード: {keywords}")
+    all_posts: list[dict] = []
+    all_posts.extend(collect_posts_from_misskey())
+    all_posts.extend(collect_posts_from_slack())
 
-    all_tasks: list[dict] = []
-    all_tasks.extend(collect_from_misskey(keywords))
-    all_tasks.extend(collect_from_slack(keywords))
+    print(f"\n合計投稿数: {len(all_posts)}件")
 
-    print(f"\n合計タスク候補: {len(all_tasks)}件")
-
-    if not all_tasks:
+    if not all_posts:
         print("収集対象の投稿がありませんでした。")
         return
 
-    added = save_to_notion(all_tasks)
+    tasks = run_ai_classification(all_posts)
 
-    print(f"\n=== 完了: Notionに{added}件のタスクを登録しました ===")
+    if not tasks:
+        print("タスクとして判定された投稿がありませんでした。")
+        return
+
+    added = save_to_obsidian(tasks)
+    print(f"\n=== 完了: Obsidianに{added}件のタスクを登録しました ===")
 
 
 if __name__ == "__main__":
