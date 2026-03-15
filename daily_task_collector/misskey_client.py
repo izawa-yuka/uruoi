@@ -21,9 +21,10 @@ class MisskeyClient:
         resp.raise_for_status()
         return resp.json()["id"]
 
-    def get_my_notes(self, since_hours: int = 25, tag: str = "uruoi") -> list[dict]:
-        """指定した時間以内の自分の #tag 付き投稿を取得する"""
+    def get_my_notes(self, since_hours: int = 25) -> list[dict]:
+        """指定した時間以内の自分の投稿を取得する"""
         since_dt = datetime.now(timezone.utc) - timedelta(hours=since_hours)
+        since_ms = int(since_dt.timestamp() * 1000)
         user_id = self.get_my_user_id()
 
         notes = []
@@ -33,8 +34,9 @@ class MisskeyClient:
             params: dict = {
                 "i": self.api_token,
                 "userId": user_id,
-                "tag": tag,
+                "sinceDate": since_ms,
                 "limit": 100,
+                "withRenotes": False,
             }
             if until_id:
                 params["untilId"] = until_id
@@ -50,27 +52,10 @@ class MisskeyClient:
             if not batch:
                 break
 
-            # 取得期間外の投稿は除外
-            filtered = [
-                note for note in batch
-                if self._note_is_within_range(note, since_dt)
-            ]
-            notes.extend(filtered)
-
-            # バッチが期間より古くなったら終了
-            if len(filtered) < len(batch):
-                break
-
+            notes.extend(batch)
             until_id = batch[-1]["id"]
 
         return notes
-
-    @staticmethod
-    def _note_is_within_range(note: dict, since_dt: datetime) -> bool:
-        created_at = datetime.fromisoformat(
-            note["createdAt"].replace("Z", "+00:00")
-        )
-        return created_at >= since_dt
 
     def extract_text(self, note: dict) -> str:
         """投稿からテキストを抽出する（renoteやリプライ含む）"""
