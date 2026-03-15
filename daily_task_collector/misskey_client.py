@@ -11,10 +11,20 @@ class MisskeyClient:
         self.base_url = f"https://{host}/api"
         self.api_token = api_token
 
+    def get_my_user_id(self) -> str:
+        """認証済みユーザーのIDを取得する"""
+        resp = requests.post(
+            f"{self.base_url}/i",
+            json={"i": self.api_token},
+            timeout=30,
+        )
+        resp.raise_for_status()
+        return resp.json()["id"]
+
     def get_my_notes(self, since_hours: int = 25) -> list[dict]:
         """指定した時間以内の自分の投稿を取得する"""
         since_dt = datetime.now(timezone.utc) - timedelta(hours=since_hours)
-        since_id = self._datetime_to_aid(since_dt)
+        user_id = self.get_my_user_id()
 
         notes = []
         until_id: Optional[str] = None
@@ -22,15 +32,16 @@ class MisskeyClient:
         while True:
             params: dict = {
                 "i": self.api_token,
+                "userId": user_id,
                 "limit": 100,
+                "withRenotes": False,
+                "withReplies": True,
             }
             if until_id:
                 params["untilId"] = until_id
-            if since_id:
-                params["sinceId"] = since_id
 
             resp = requests.post(
-                f"{self.base_url}/notes/timeline",
+                f"{self.base_url}/users/notes",
                 json=params,
                 timeout=30,
             )
@@ -61,13 +72,6 @@ class MisskeyClient:
             note["createdAt"].replace("Z", "+00:00")
         )
         return created_at >= since_dt
-
-    @staticmethod
-    def _datetime_to_aid(dt: datetime) -> str:
-        """AID形式のIDを生成してsinceIdとして使う（概算）"""
-        # MisskeyのAIDはタイムスタンプベースなので、
-        # sinceIdには空文字を渡してクライアント側でフィルタする
-        return ""
 
     def extract_text(self, note: dict) -> str:
         """投稿からテキストを抽出する（renoteやリプライ含む）"""
