@@ -21,8 +21,8 @@ class MisskeyClient:
         resp.raise_for_status()
         return resp.json()["id"]
 
-    def get_my_notes(self, since_hours: int = 25) -> list[dict]:
-        """指定した時間以内の自分の投稿を取得する"""
+    def get_my_notes(self, since_hours: int = 25, tag: str = "uruoi") -> list[dict]:
+        """指定した時間以内の自分の #tag 付き投稿を取得する"""
         since_dt = datetime.now(timezone.utc) - timedelta(hours=since_hours)
         user_id = self.get_my_user_id()
 
@@ -33,9 +33,8 @@ class MisskeyClient:
             params: dict = {
                 "i": self.api_token,
                 "userId": user_id,
+                "tag": tag,
                 "limit": 100,
-                "withRenotes": False,
-                "withReplies": True,
             }
             if until_id:
                 params["untilId"] = until_id
