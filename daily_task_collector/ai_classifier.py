@@ -2,10 +2,12 @@
 
 import json
 import os
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 
 CATEGORIES = ["買いたいもの", "生活", "調べたいもの", "仕事", "その他"]
 BATCH_SIZE = 20
+MODEL = "gemini-2.0-flash"
 
 SYSTEM_PROMPT = """あなたは日本語の投稿からタスク（やりたいこと・したいこと・欲しいもの）を抽出するアシスタントです。
 
@@ -36,22 +38,18 @@ def classify_posts(posts: list[dict]) -> list[dict]:
     if not api_key:
         raise RuntimeError("環境変数 GEMINI_API_KEY が設定されていません")
 
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel(
-        model_name="gemini-1.5-flash",
-        system_instruction=SYSTEM_PROMPT,
-    )
+    client = genai.Client(api_key=api_key)
 
     results: list[dict] = []
     for i in range(0, len(posts), BATCH_SIZE):
         batch = posts[i:i + BATCH_SIZE]
-        batch_results = _classify_batch(model, batch)
+        batch_results = _classify_batch(client, batch)
         results.extend(batch_results)
 
     return results
 
 
-def _classify_batch(model: genai.GenerativeModel, batch: list[dict]) -> list[dict]:
+def _classify_batch(client: genai.Client, batch: list[dict]) -> list[dict]:
     """バッチ単位でGemini APIを呼び出す"""
     posts_text = "\n".join(
         f'[{p["index"]}] {p["text"]}' for p in batch
@@ -69,7 +67,13 @@ def _classify_batch(model: genai.GenerativeModel, batch: list[dict]) -> list[dic
   {{"index": 1, "is_task": true, "tasks": [{{"title": "タスクのタイトル", "category": "カテゴリ名"}}]}}
 ]"""
 
-    response = model.generate_content(user_message)
+    response = client.models.generate_content(
+        model=MODEL,
+        contents=user_message,
+        config=types.GenerateContentConfig(
+            system_instruction=SYSTEM_PROMPT,
+        ),
+    )
     raw = response.text.strip()
     return _parse_response(raw, batch)
 
