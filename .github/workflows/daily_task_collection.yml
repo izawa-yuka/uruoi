@@ -1,0 +1,39 @@
+name: 毎日タスク収集 (Misskey + Slack → Notion)
+
+on:
+  # 毎日 日本時間 朝8時に実行（UTC 23時）
+  schedule:
+    - cron: "0 23 * * *"
+  # 手動実行も可能
+  workflow_dispatch:
+
+jobs:
+  collect-tasks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Python セットアップ
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: 依存パッケージのインストール
+        run: pip install -r requirements.txt
+
+      - name: タスク収集を実行
+        env:
+          MISSKEY_HOST: ${{ secrets.MISSKEY_HOST }}
+          MISSKEY_API_TOKEN: ${{ secrets.MISSKEY_API_TOKEN }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+          SLACK_WORKSPACE_DOMAIN: ${{ secrets.SLACK_WORKSPACE_DOMAIN }}
+          NOTION_API_TOKEN: ${{ secrets.NOTION_API_TOKEN }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+          TASK_HASHTAGS: ${{ vars.TASK_HASHTAGS }}
+          COLLECT_HOURS: ${{ vars.COLLECT_HOURS || '25' }}
+        run: python run_daily_task_collector.py
