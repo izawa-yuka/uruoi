@@ -46,28 +46,29 @@ def collect_posts_from_slack() -> list[dict]:
         print("[Slack] 環境変数 SLACK_BOT_TOKEN が未設定のためスキップ")
         return []
 
-    channel_id = os.getenv("SLACK_CHANNEL_ID")
-    if not channel_id:
-        print("[Slack] 環境変数 SLACK_CHANNEL_ID が未設定のためスキップ")
+    channel_ids_raw = os.getenv("SLACK_CHANNEL_IDS") or os.getenv("SLACK_CHANNEL_ID")
+    if not channel_ids_raw:
+        print("[Slack] 環境変数 SLACK_CHANNEL_IDS が未設定のためスキップ")
         return []
 
+    channel_ids = [c.strip() for c in channel_ids_raw.split(",") if c.strip()]
     workspace = os.getenv("SLACK_WORKSPACE_DOMAIN", "app")
     collect_hours = int(os.getenv("COLLECT_HOURS", "25"))
-    print(f"[Slack] 過去{collect_hours}時間のメッセージを取得中...")
-
-    messages = client.get_channel_messages(channel_id=channel_id, since_hours=collect_hours)
-    print(f"[Slack] {len(messages)}件のメッセージを取得")
+    print(f"[Slack] 過去{collect_hours}時間のメッセージを取得中... ({len(channel_ids)}チャンネル)")
 
     posts = []
-    for msg in messages:
-        text = client.extract_text(msg)
-        if not text:
-            continue
-        posts.append({
-            "text": clean_task_text(text),
-            "source": "Slack",
-            "url": client.get_message_url(workspace, channel_id, msg.get("ts", "")),
-        })
+    for channel_id in channel_ids:
+        messages = client.get_channel_messages(channel_id=channel_id, since_hours=collect_hours)
+        print(f"[Slack] #{channel_id}: {len(messages)}件のメッセージを取得")
+        for msg in messages:
+            text = client.extract_text(msg)
+            if not text:
+                continue
+            posts.append({
+                "text": clean_task_text(text),
+                "source": "Slack",
+                "url": client.get_message_url(workspace, channel_id, msg.get("ts", "")),
+            })
     return posts
 
 
