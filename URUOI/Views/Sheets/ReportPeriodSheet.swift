@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import PDFKit
 
 /// 獣医向けレポートの期間選択＆PDF生成シート
 struct ReportPeriodSheet: View {
@@ -28,8 +29,11 @@ struct ReportPeriodSheet: View {
     @State private var showingShareSheet = false
     @State private var generatedPDFData: Data?
     @State private var generatedFileName: String = ""
+    @State private var memo: String = ""
+    @State private var memoDebounceTask: Task<Void, Never>?
 
     private let calendar = Calendar.current
+    private let memoCharacterLimit = 300
 
     private var isUnlocked: Bool {
         isProMember || selectedPeriod == .week
@@ -52,122 +56,199 @@ struct ReportPeriodSheet: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 24) {
-                // 期間選択ピッカー
-                Picker("期間", selection: $selectedPeriod) {
-                    ForEach(AnalysisPeriod.allCases, id: \.self) { period in
-                        Text(period.localizedTitle).tag(period)
-                    }
-                }
-                .pickerStyle(.segmented)
-                .padding(.horizontal)
-                .padding(.top, 8)
-
-                // 日付ナビゲーション
-                HStack {
-                    Button {
-                        withAnimation {
-                            let component: Calendar.Component = switch selectedPeriod {
-                            case .week: .weekOfYear
-                            case .month: .month
-                            case .year: .year
-                            }
-                            currentDate = calendar.date(byAdding: component, value: -1, to: currentDate) ?? currentDate
+            VStack(spacing: 0) {
+                // スクロール不要な固定コンテンツ + 可変エリア
+                VStack(spacing: 16) {
+                    // 期間選択ピッカー
+                    Picker("期間", selection: $selectedPeriod) {
+                        ForEach(AnalysisPeriod.allCases, id: \.self) { period in
+                            Text(period.localizedTitle).tag(period)
                         }
-                    } label: {
-                        Image(systemName: "chevron.left")
-                            .font(.title3)
-                            .foregroundColor(.appMain)
-                            .frame(width: 44, height: 44)
                     }
+                    .pickerStyle(.segmented)
+                    .padding(.horizontal)
+                    .padding(.top, 8)
 
-                    Spacer()
-
-                    Text(periodTitle)
-                        .font(.headline)
-                        .foregroundColor(.primary)
-
-                    Spacer()
-
-                    Button {
-                        withAnimation {
-                            let component: Calendar.Component = switch selectedPeriod {
-                            case .week: .weekOfYear
-                            case .month: .month
-                            case .year: .year
+                    // 日付ナビゲーション
+                    HStack {
+                        Button {
+                            withAnimation {
+                                let component: Calendar.Component = switch selectedPeriod {
+                                case .week: .weekOfYear
+                                case .month: .month
+                                case .year: .year
+                                }
+                                currentDate = calendar.date(byAdding: component, value: -1, to: currentDate) ?? currentDate
                             }
-                            currentDate = calendar.date(byAdding: component, value: 1, to: currentDate) ?? currentDate
+                        } label: {
+                            Image(systemName: "chevron.left")
+                                .font(.title3)
+                                .foregroundColor(.appMain)
+                                .frame(width: 44, height: 44)
                         }
-                    } label: {
-                        Image(systemName: "chevron.right")
-                            .font(.title3)
-                            .foregroundColor(canMoveToNext ? .appMain : .gray)
-                            .frame(width: 44, height: 44)
+
+                        Spacer()
+
+                        Text(periodTitle)
+                            .font(.headline)
+                            .foregroundColor(.primary)
+
+                        Spacer()
+
+                        Button {
+                            withAnimation {
+                                let component: Calendar.Component = switch selectedPeriod {
+                                case .week: .weekOfYear
+                                case .month: .month
+                                case .year: .year
+                                }
+                                currentDate = calendar.date(byAdding: component, value: 1, to: currentDate) ?? currentDate
+                            }
+                        } label: {
+                            Image(systemName: "chevron.right")
+                                .font(.title3)
+                                .foregroundColor(canMoveToNext ? .appMain : .gray)
+                                .frame(width: 44, height: 44)
+                        }
+                        .disabled(!canMoveToNext)
                     }
-                    .disabled(!canMoveToNext)
+                    .padding(.horizontal)
+
+                    // PDFプレビュー or ロック表示
+                    if isUnlocked {
+                        if let pdfData = generatedPDFData {
+                            PDFKitView(data: pdfData)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .shadow(color: .black.opacity(0.12), radius: 8, x: 0, y: 2)
+                                .padding(.horizontal)
+
+                            HStack(spacing: 4) {
+                                Image(systemName: "printer")
+                                    .font(.caption2)
+                                Text("A4サイズで印刷できます")
+                                    .font(.caption)
+                            }
+                            .foregroundStyle(.secondary)
+                        } else {
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color(.systemGroupedBackground))
+                                .overlay {
+                                    ProgressView()
+                                }
+                                .padding(.horizontal)
+                        }
+                    } else {
+                        VStack(spacing: 16) {
+                            Image(systemName: "lock.fill")
+                                .font(.system(size: 40))
+                                .foregroundColor(.appMain)
+                            Text("月・年レポートはプレミアム機能です")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color(.systemGroupedBackground))
+                        )
+                        .padding(.horizontal)
+                    }
+
+                // 病院へのメモ入力欄
+                if isUnlocked {
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack {
+                            Label(String(localized: "病院へのメモ"), systemImage: "note.text")
+                                .font(.subheadline.weight(.medium))
+                                .foregroundColor(.primary)
+                            Spacer()
+                            Text("\(memo.count)/\(memoCharacterLimit)")
+                                .font(.caption)
+                                .foregroundColor(memo.count >= memoCharacterLimit ? .red : .secondary)
+                        }
+
+                        ZStack(alignment: .topLeading) {
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(Color(.secondarySystemGroupedBackground))
+                                .frame(minHeight: 80, maxHeight: 120)
+
+                            if memo.isEmpty {
+                                Text(String(localized: "症状・気になること・質問など、受診時に伝えたいメモを入力してください"))
+                                    .font(.subheadline)
+                                    .foregroundStyle(.tertiary)
+                                    .padding(.horizontal, 12)
+                                    .padding(.top, 10)
+                                    .allowsHitTesting(false)
+                            }
+
+                            TextEditor(text: $memo)
+                                .font(.subheadline)
+                                .scrollContentBackground(.hidden)
+                                .background(Color.clear)
+                                .frame(minHeight: 80, maxHeight: 120)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                        }
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Color(.separator), lineWidth: 0.5)
+                        )
+                    }
+                    .padding(.horizontal)
+                    .onChange(of: memo) {
+                        // 文字数制限
+                        if memo.count > memoCharacterLimit {
+                            memo = String(memo.prefix(memoCharacterLimit))
+                        }
+                        // デバウンス付きでプレビュー再生成
+                        memoDebounceTask?.cancel()
+                        memoDebounceTask = Task {
+                            try? await Task.sleep(nanoseconds: 500_000_000)
+                            if !Task.isCancelled {
+                                await MainActor.run { generatePreview() }
+                            }
+                        }
+                    }
                 }
-                .padding(.horizontal)
-
-                Spacer()
-
-                // レポート説明
-                VStack(spacing: 12) {
-                    Image(systemName: "doc.text")
-                        .font(.system(size: 48))
-                        .foregroundColor(.appMain)
-
-                    Text(String(localized: "選択した期間の飲水量データをPDFレポートとして出力します。獣医への共有にご活用ください。"))
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 32)
                 }
-
-                Spacer()
+                .frame(maxHeight: .infinity, alignment: .top)
 
                 // 生成ボタン or プレミアム導線
                 if isUnlocked {
                     Button {
-                        generateAndShare()
+                        showingShareSheet = true
                     } label: {
                         HStack {
                             Image(systemName: "square.and.arrow.up")
-                            Text(String(localized: "レポートを作成"))
+                            Text(String(localized: "レポートを共有"))
                         }
                         .font(.headline)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 52)
-                        .background(Color.appMain)
+                        .background(generatedPDFData != nil ? Color.appMain : Color.gray)
                         .cornerRadius(.buttonCornerRadius)
                     }
+                    .disabled(generatedPDFData == nil)
                     .padding(.horizontal)
+                    .padding(.bottom, 24)
                 } else {
-                    VStack(spacing: 12) {
-                        HStack(spacing: 6) {
-                            Image(systemName: "lock.fill")
-                                .foregroundColor(.appMain)
-                            Text(String(localized: "月・年レポートはプレミアム機能です"))
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                        }
-
-                        Button {
-                            showingPremiumIntro = true
-                        } label: {
-                            Text(String(localized: "詳しく見る"))
-                                .font(.headline)
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 52)
-                                .background(Color.appMain)
-                                .cornerRadius(.buttonCornerRadius)
-                        }
-                        .padding(.horizontal)
+                    Button {
+                        showingPremiumIntro = true
+                    } label: {
+                        Text(String(localized: "詳しく見る"))
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 52)
+                            .background(Color.appMain)
+                            .cornerRadius(.buttonCornerRadius)
                     }
+                    .padding(.horizontal)
+                    .padding(.bottom, 24)
                 }
             }
-            .padding(.bottom, 24)
             .navigationTitle(String(localized: "飲水量レポート"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -187,21 +268,53 @@ struct ReportPeriodSheet: View {
                     ])
                 }
             }
+            .onAppear {
+                generatePreview()
+            }
+            .onChange(of: selectedPeriod) {
+                generatePreview()
+            }
+            .onChange(of: currentDate) {
+                generatePreview()
+            }
         }
     }
 
-    private func generateAndShare() {
+    private func generatePreview() {
+        guard isUnlocked else {
+            generatedPDFData = nil
+            return
+        }
         let pdfData = PDFReportGenerator.generateReport(
             records: records,
             period: selectedPeriod,
             currentDate: currentDate,
-            numberOfPets: numberOfPets
+            numberOfPets: numberOfPets,
+            memo: memo
         )
         let fileName = PDFReportGenerator.fileName(period: selectedPeriod, currentDate: currentDate)
-
         generatedPDFData = pdfData
         generatedFileName = fileName
-        showingShareSheet = true
+    }
+}
+
+// MARK: - PDFKitView (PDFプレビュー)
+
+struct PDFKitView: UIViewRepresentable {
+    let data: Data
+
+    func makeUIView(context: Context) -> PDFView {
+        let pdfView = PDFView()
+        pdfView.autoScales = true
+        pdfView.displayMode = .singlePageContinuous
+        pdfView.displayDirection = .vertical
+        pdfView.backgroundColor = UIColor.secondarySystemGroupedBackground
+        return pdfView
+    }
+
+    func updateUIView(_ pdfView: PDFView, context: Context) {
+        pdfView.document = PDFDocument(data: data)
+        pdfView.scaleFactor = pdfView.scaleFactorForSizeToFit
     }
 }
 

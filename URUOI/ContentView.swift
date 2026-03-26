@@ -16,6 +16,8 @@ struct ContentView: View {
     @AppStorage("householdID") private var householdID: String = ""
     @State private var showWhatsNew = false
     @State private var showUpdateAlert = false
+    // App Storeアップデートがあるかどうかを一旦保持するフラグ（シートとの競合防止用）
+    @State private var pendingUpdateAlert = false
 
     var body: some View {
         // スプラッシュ画面を削除し、直接メイン画面へ遷移
@@ -32,7 +34,13 @@ struct ContentView: View {
                     do {
                         let hasUpdate = try await UpdateChecker.checkUpdate()
                         if hasUpdate {
-                            showUpdateAlert = true
+                            // WhatsNewシートが表示中ならアラートを保留する
+                            // （アラートがシートを閉じてしまうのを防ぐため）
+                            if showWhatsNew {
+                                pendingUpdateAlert = true
+                            } else {
+                                showUpdateAlert = true
+                            }
                         }
                     } catch {
                         print("App Store update check failed: \(error)")
@@ -43,7 +51,7 @@ struct ContentView: View {
                     if !householdID.isEmpty {
                         DataSyncService.shared.startSync(householdID: householdID, modelContext: modelContext)
                     }
-                    // バージョンチェックを行う
+                    // WhatsNewチェックを即時実行（App Storeチェックより先にshowWhatsNewをセットするため遅延なし）
                     checkForUpdates()
                 }
                 .onChange(of: householdID) { oldValue, newValue in
@@ -55,10 +63,17 @@ struct ContentView: View {
                         DataSyncService.shared.startSync(householdID: newValue, modelContext: modelContext)
                     }
                 }
-                .sheet(isPresented: $showWhatsNew) {
+                .sheet(isPresented: $showWhatsNew, onDismiss: {
+                    // WhatsNewシートが閉じた後、保留中のアップデートアラートがあれば表示
+                    if pendingUpdateAlert {
+                        pendingUpdateAlert = false
+                        showUpdateAlert = true
+                    }
+                }) {
                     WhatsNewView {
                         updateSavedVersion()
                     }
+                    .interactiveDismissDisabled(true)
                 }
                 .alert("アップデートのお知らせ", isPresented: $showUpdateAlert) {
                     Button("アップデートする") {
