@@ -146,12 +146,12 @@
             "state" : "translated",
             "value" : "%1$lldd %2$lldh %3$lldm elapsed"
           }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld日と%2$lld時間%3$lld分経過"
-          }
+        }
+      },
+      "ja" : {
+        "stringUnit" : {
+          "state" : "translated",
+          "value" : "%1$lld日と%2$lld時間%3$lld分経過"
         }
       }
     },
@@ -162,12 +162,12 @@
             "state" : "translated",
             "value" : "%1$lldh %2$lldm elapsed"
           }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld時間%2$lld分経過"
-          }
+        }
+      },
+      "ja" : {
+        "stringUnit" : {
+          "state" : "translated",
+          "value" : "%1$lld時間%2$lld分経過"
         }
       }
     },
@@ -234,6 +234,7 @@
       }
     },
     "⚠️ 健康アラート" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -244,6 +245,7 @@
       }
     },
     "📸 スクリーンショット用" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -254,6 +256,7 @@
       }
     },
     "🔔 テスト通知" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -264,6 +267,7 @@
       }
     },
     "🔔 通知デバッグ" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -283,7 +287,18 @@
         }
       }
     },
+    "1匹1日平均" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daily Avg. (per pet)"
+          }
+        }
+      }
+    },
     "1匹あたり" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -302,9 +317,6 @@
           }
         }
       }
-    },
-    "1回ごとの量は普通でも、今日あまり飲んでいないと感じたときにも、お知らせが届くようになりました。" : {
-
     },
     "1日の飲水量が基準を下回った場合に通知します。" : {
       "localizations" : {
@@ -338,6 +350,7 @@
       }
     },
     "5秒後にテスト通知" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -348,7 +361,14 @@
       }
     },
     "A4サイズで印刷できます" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can be printed in A4 size"
+          }
+        }
+      }
     },
     "g" : {
       "comment" : "A unit of measurement for weight.",
@@ -394,15 +414,22 @@
         }
       }
     },
-    "PDFデータの作成・ダウンロード" : {
-
-    },
     "PDFデータ作成" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Create PDF"
+          }
+        }
+      }
+    },
+    "PDFレポートの数値をより正確に" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Improved PDF Report Accuracy"
           }
         }
       }
@@ -540,9 +567,6 @@
         }
       }
     },
-    "お知らせのタイミングを改善しました" : {
-
-    },
     "キャンセル" : {
       "localizations" : {
         "en" : {
@@ -637,6 +661,7 @@
       }
     },
     "これは5秒後のテスト通知です。通知機能は正常に動作しています。" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -645,12 +670,6 @@
           }
         }
       }
-    },
-    "これまでは、1回の記録が少ないだけでもお知らせが届いてしまうことがありました。少ない日が続いたときだけお知らせするように改善しましたので、「たまたま少なかった」だけでは通知が来なくなります。" : {
-
-    },
-    "これまでプレミアム会員限定だった分析レポートのうち、週次レポートをすべてのユーザーに開放しました。過去1週間の飲水量をPDFで確認・共有できます。月次・年次レポートは引き続きプレミアム機能です。" : {
-
     },
     "さあ、はじめましょう" : {
       "comment" : "Onboarding title 4",
@@ -685,6 +704,7 @@
       }
     },
     "スクショ用データを生成" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -714,7 +734,18 @@
         }
       }
     },
+    "その他、アプリがより快適に動くように軽微な修正を行いました。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Made other minor improvements and bug fixes for a smoother experience."
+          }
+        }
+      }
+    },
     "その他、軽微な修正と動作の安定性向上を行いました。" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -734,10 +765,8 @@
         }
       }
     },
-    "その日の合計でもお知らせします" : {
-
-    },
     "ダミーデータの生成に失敗しました" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -768,6 +797,7 @@
       }
     },
     "データの生成" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -996,7 +1026,14 @@
       }
     },
     "レポートを共有" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share Report"
+          }
+        }
+      }
     },
     "上書きして共有を受ける" : {
       "localizations" : {
@@ -1052,7 +1089,14 @@
       }
     },
     "今日の飲水量の合計が、普段より少なくなっています。" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today's total water intake is lower than usual."
+          }
+        }
+      }
     },
     "今月" : {
       "localizations" : {
@@ -1125,6 +1169,7 @@
       }
     },
     "健康アラートをテスト発火(5秒後)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1660,6 +1705,16 @@
         }
       }
     },
+    "履歴タブに曜日を追加しました" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Added Day of the Week to History"
+          }
+        }
+      }
+    },
     "履歴のデータが順不同に表示される、または一部反映されないことがある問題を修正し、常に最新の記録が正確に並ぶよう改善しました。" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1701,6 +1756,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fixed History Screen Bug"
+          }
+        }
+      }
+    },
+    "履歴画面の日付に曜日（月、火など）も表示されるようになり、いつの記録なのかがひと目でわかりやすくなりました。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The day of the week (Mon, Tue, etc.) is now displayed next to the date on the History screen, making it easier to identify records at a glance."
           }
         }
       }
@@ -1792,6 +1857,7 @@
       }
     },
     "待機中の通知リストを出力" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1837,6 +1903,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Enter Sharing ID"
+          }
+        }
+      }
+    },
+    "数日まとめて入れ替えた場合でも、アプリが経過日数を考慮し、より正しい「1匹あたりの1日平均」を算出してPDFに表示するようになりました。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Even if the water is changed after multiple days, the app now considers the elapsed days to calculate and display a more accurate 'daily average per pet' in the PDF."
           }
         }
       }
@@ -1904,9 +1980,6 @@
         }
       }
     },
-    "新機能モーダルの表示フラグをリセット" : {
-
-    },
     "新規設置" : {
       "localizations" : {
         "en" : {
@@ -1918,6 +1991,7 @@
       }
     },
     "既存のデータはすべて削除され、ダミーデータに置き換わります。よろしいですか？" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1981,6 +2055,7 @@
       }
     },
     "昨日の飲水量が基準(%lldml)を下回っています(実績: %lldml)。体調の変化に注意してください。" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2027,7 +2102,14 @@
       }
     },
     "月額換算 %@" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ / mo equivalent"
+          }
+        }
+      }
     },
     "有効にする" : {
       "localizations" : {
@@ -2060,6 +2142,7 @@
       }
     },
     "権限ステータス確認" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2225,6 +2308,7 @@
       }
     },
     "生成する" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2235,10 +2319,24 @@
       }
     },
     "病院へのメモ" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Memo for Vet"
+          }
+        }
+      }
     },
     "症状・気になること・質問など、受診時に伝えたいメモを入力してください" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter any symptoms, concerns, or questions you want to share at your vet visit."
+          }
+        }
+      }
     },
     "登録数の上限です" : {
       "localizations" : {
@@ -2386,9 +2484,6 @@
         }
       }
     },
-    "記録データをPDFとして作成し、ダウンロードできるようになりました。印刷や共有にご活用ください。" : {
-
-    },
     "記録の削除に失敗しました" : {
       "localizations" : {
         "en" : {
@@ -2514,6 +2609,7 @@
       }
     },
     "設定アプリから通知を許可してください。" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2665,6 +2761,7 @@
       }
     },
     "通知が無効です" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2693,9 +2790,6 @@
           }
         }
       }
-    },
-    "週次レポートを無料で見られるようになりました" : {
-
     },
     "過去7日間" : {
       "localizations" : {

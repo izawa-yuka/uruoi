@@ -135,14 +135,18 @@ final class PDFReportGenerator {
         let petCount = max(numberOfPets, 1)
 
         // 日ごとにグループ化
-        var dailyMap: [Date: (amount: Double, weather: String?, temperature: Double?)] = [:]
+        var dailyMap: [Date: (amount: Double, durationDays: Double, weather: String?, temperature: Double?)] = [:]
 
         for record in records {
             guard let endTime = record.endTime, let amount = record.amount else { continue }
             let dayStart = calendar.startOfDay(for: endTime)
 
-            var existing = dailyMap[dayStart] ?? (amount: 0, weather: nil, temperature: nil)
+            let durationSeconds = max(endTime.timeIntervalSince(record.startTime), 0)
+            let daysPassed = durationSeconds / 86400.0
+
+            var existing = dailyMap[dayStart] ?? (amount: 0, durationDays: 0, weather: nil, temperature: nil)
             existing.amount += amount
+            existing.durationDays += daysPassed
             // 天気・気温は最初に見つかったものを使う
             if existing.weather == nil { existing.weather = record.weatherCondition }
             if existing.temperature == nil { existing.temperature = record.temperature }
@@ -157,10 +161,16 @@ final class PDFReportGenerator {
             let entry = dailyMap[dayStart]
             let totalAmount = entry?.amount ?? 0
 
+            let durationDays = entry?.durationDays ?? 0
+            // 計測日数が1日未満の場合は過剰なペース換算を防ぐために1で割る、複数日の場合はその日数で割る
+            let normalizedDays = max(durationDays, 1.0)
+            let dailyRate = totalAmount / normalizedDays
+            let perCatAmount = dailyRate / Double(petCount)
+
             result.append(DailyReportData(
                 date: dayStart,
                 totalAmount: totalAmount,
-                perCatAmount: totalAmount / Double(petCount),
+                perCatAmount: perCatAmount,
                 weather: entry?.weather,
                 temperature: entry?.temperature
             ))
@@ -315,7 +325,7 @@ final class PDFReportGenerator {
         let headers = [
             (String(localized: "日付"), colDate),
             (String(localized: "合計"), colTotal),
-            (String(localized: "1匹あたり"), colPerCat),
+            (String(localized: "1匹1日平均"), colPerCat),
             (String(localized: "天気"), colWeather),
             (String(localized: "気温"), colTemp)
         ]

@@ -28,33 +28,21 @@ struct WhatsNewView: View {
                     // アップデート内容リスト
                     VStack(alignment: .leading, spacing: 28) {
                         featureRow(
-                            icon: "chart.bar.fill",
-                            title: "週次レポートを無料で見られるようになりました",
-                            description: "これまでプレミアム会員限定だった分析レポートのうち、週次レポートをすべてのユーザーに開放しました。過去1週間の飲水量をPDFで確認・共有できます。月次・年次レポートは引き続きプレミアム機能です。"
-                        )
-
-                        featureRow(
                             icon: "doc.richtext",
-                            title: "PDFデータの作成・ダウンロード",
-                            description: "記録データをPDFとして作成し、ダウンロードできるようになりました。印刷や共有にご活用ください。"
+                            title: "PDFレポートの数値をより正確に",
+                            description: "数日まとめて入れ替えた場合でも、アプリが経過日数を考慮し、より正しい「1匹あたりの1日平均」を算出してPDFに表示するようになりました。"
                         )
 
                         featureRow(
-                            icon: "bell.slash.fill",
-                            title: "お知らせのタイミングを改善しました",
-                            description: "これまでは、1回の記録が少ないだけでもお知らせが届いてしまうことがありました。少ない日が続いたときだけお知らせするように改善しましたので、「たまたま少なかった」だけでは通知が来なくなります。"
-                        )
-
-                        featureRow(
-                            icon: "bell.fill",
-                            title: "その日の合計でもお知らせします",
-                            description: "1回ごとの量は普通でも、今日あまり飲んでいないと感じたときにも、お知らせが届くようになりました。"
+                            icon: "calendar",
+                            title: "履歴タブに曜日を追加しました",
+                            description: "履歴画面の日付に曜日（月、火など）も表示されるようになり、いつの記録なのかがひと目でわかりやすくなりました。"
                         )
 
                         featureRow(
                             icon: "wrench.adjustable.fill",
                             title: "その他の改善",
-                            description: "その他、軽微な修正と動作の安定性向上を行いました。"
+                            description: "その他、アプリがより快適に動くように軽微な修正を行いました。"
                         )
                     }
                     .padding(.horizontal, 24)

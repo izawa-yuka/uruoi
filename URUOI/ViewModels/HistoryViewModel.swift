@@ -305,7 +305,7 @@ final class HistoryViewModel {
     func formatDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale.current
-        formatter.setLocalizedDateFormatFromTemplate("yMMMMd")
+        formatter.setLocalizedDateFormatFromTemplate("yMMMMdE")
         return formatter.string(from: date)
     }
     
