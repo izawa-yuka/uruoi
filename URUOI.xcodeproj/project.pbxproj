@@ -13,6 +13,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		CE0722C92F7428A000B62514 /* URUOI.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = URUOI.xcodeproj; sourceTree = "<group>"; };
+		CE09F3C12F74D415009E9773 /* URUOI.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = URUOI.xcodeproj; sourceTree = "<group>"; };
 		CE2F7A432F37032600116106 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		CE3EC2492F06779900A2C0CF /* URUOI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = URUOI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -51,6 +53,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		CE0722CA2F7428A000B62514 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CE09F3C52F74D415009E9773 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		CE3EC2402F06779900A2C0CF = {
 			isa = PBXGroup;
 			children = (
@@ -126,6 +142,16 @@
 			preferredProjectObjectVersion = 77;
 			productRefGroup = CE3EC24A2F06779900A2C0CF /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = CE0722CA2F7428A000B62514 /* Products */;
+					ProjectRef = CE0722C92F7428A000B62514 /* URUOI.xcodeproj */;
+				},
+				{
+					ProductGroup = CE09F3C52F74D415009E9773 /* Products */;
+					ProjectRef = CE09F3C12F74D415009E9773 /* URUOI.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				CE3EC2482F06779900A2C0CF /* URUOI */,
@@ -301,7 +327,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.3;
+				MARKETING_VERSION = 1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kinakodaifuku.URUOI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -341,7 +367,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.3;
+				MARKETING_VERSION = 1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kinakodaifuku.URUOI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

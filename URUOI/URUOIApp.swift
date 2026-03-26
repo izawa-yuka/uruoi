@@ -31,6 +31,10 @@ struct URUOIApp: App {
         WindowGroup {
             // UserSettings の environmentObject も削除済み（ContentView内で @AppStorage を使うため不要）
             ContentView()
+                // URLスキーム（uruoi://など）からアプリが起動されたときに呼ばれる処理です
+                .onOpenURL { url in
+                    print("アプリが次のURLから開かれました: \(url)")
+                }
         }
         // SwiftDataのコンテナを適用
         .modelContainer(sharedModelContainer)
