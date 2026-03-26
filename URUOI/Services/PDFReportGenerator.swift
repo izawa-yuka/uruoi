@@ -37,12 +37,14 @@ final class PDFReportGenerator {
     ///   - period: 対象期間
     ///   - currentDate: 基準日
     ///   - numberOfPets: ペット数
+    ///   - memo: 病院へのメモ（省略可）
     /// - Returns: PDFデータ
     static func generateReport(
         records: [WaterRecord],
         period: AnalysisPeriod,
         currentDate: Date,
-        numberOfPets: Int
+        numberOfPets: Int,
+        memo: String = ""
     ) -> Data {
         let calendar = Calendar.current
 
@@ -93,6 +95,9 @@ final class PDFReportGenerator {
 
             // テーブル
             y = drawTable(context: context, y: y, dailyData: dailyData, period: period)
+
+            // 病院へのメモ
+            y = drawMemo(y: y, memo: memo)
 
             // フッター（最終ページに描画）
             drawFooter()
@@ -399,6 +404,59 @@ final class PDFReportGenerator {
         UIBezierPath(rect: lineRect).fill()
 
         currentY += 16
+        return currentY
+    }
+
+    private static func drawMemo(y: CGFloat, memo: String) -> CGFloat {
+        let trimmed = memo.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return y }
+
+        var currentY = y + 8
+
+        // セクションタイトル
+        let titleAttrs: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: 14, weight: .bold),
+            .foregroundColor: UIColor.label
+        ]
+        String(localized: "病院へのメモ").draw(at: CGPoint(x: margin, y: currentY), withAttributes: titleAttrs)
+        currentY += 24
+
+        // メモ本文スタイル
+        let memoAttrs: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: 12, weight: .regular),
+            .foregroundColor: UIColor.label
+        ]
+
+        let textMaxWidth = contentWidth - 32
+        let boundingRect = (trimmed as NSString).boundingRect(
+            with: CGSize(width: textMaxWidth, height: .greatestFiniteMagnitude),
+            options: [.usesLineFragmentOrigin, .usesFontLeading],
+            attributes: memoAttrs,
+            context: nil
+        )
+
+        let boxHeight = max(60, ceil(boundingRect.height) + 28)
+        let boxRect = CGRect(x: margin, y: currentY, width: contentWidth, height: boxHeight)
+
+        // 背景
+        lightBrandColor.setFill()
+        UIBezierPath(roundedRect: boxRect, cornerRadius: 8).fill()
+
+        // 枠線
+        brandColor.withAlphaComponent(0.25).setStroke()
+        let borderPath = UIBezierPath(roundedRect: boxRect, cornerRadius: 8)
+        borderPath.lineWidth = 1
+        borderPath.stroke()
+
+        // メモテキスト
+        (trimmed as NSString).draw(
+            with: CGRect(x: margin + 16, y: currentY + 14, width: textMaxWidth, height: ceil(boundingRect.height)),
+            options: [.usesLineFragmentOrigin, .usesFontLeading],
+            attributes: memoAttrs,
+            context: nil
+        )
+
+        currentY += boxHeight + 16
         return currentY
     }
 

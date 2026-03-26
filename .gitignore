@@ -48,3 +48,6 @@ Thumbs.db
 # 他プロジェクト
 /smoke_tracks
 /flavor_tracks
+
+# AI agent artifacts
+.agent/
