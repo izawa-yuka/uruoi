@@ -58,6 +58,6 @@ struct FirestoreRecord: Codable, Identifiable {
         self.weatherCondition = record.weatherCondition
         self.temperature = record.temperature
         self.note = record.note
-        self.createdByDeviceID = record.createdByDeviceID
+        self.createdByDeviceID = record.createdByDeviceID ?? DeviceManager.currentDeviceID
     }
 }
