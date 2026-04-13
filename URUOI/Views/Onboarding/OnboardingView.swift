@@ -10,50 +10,88 @@ import SwiftUI
 struct OnboardingView: View {
     @Binding var hasSeenOnboarding: Bool
     @State private var currentPage = 0
-    
+    private let totalPages = 4
+
     var body: some View {
         ZStack {
             Color.backgroundGray
                 .ignoresSafeArea()
-            
+
             VStack(spacing: 0) {
-                // スキップボタン
+
+                // スキップボタン（最終ページでは非表示）
                 HStack {
                     Spacer()
-                    Button {
+                    if currentPage < totalPages - 1 {
+                        Button {
+                            withAnimation {
+                                hasSeenOnboarding = true
+                            }
+                        } label: {
+                            Text("スキップ", comment: "Onboarding skip button")
+                                .font(.body)
+                                .foregroundColor(.secondary)
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 12)
+                        }
+                    }
+                }
+                .frame(height: 44)
+                .padding(.top, 8)
+
+                // スライドコンテンツ
+                TabView(selection: $currentPage) {
+                    IntroductionSlide().tag(0)
+                    RecordingSlide().tag(1)
+                    AnalysisSlide().tag(2)
+                    StartSlide().tag(3)
+                }
+                .tabViewStyle(.page(indexDisplayMode: .never))
+                .gesture(DragGesture()) // スワイプ無効化
+
+                // ページインジケーター
+                HStack(spacing: 8) {
+                    ForEach(0..<totalPages, id: \.self) { index in
+                        Circle()
+                            .fill(index == currentPage
+                                  ? Color.appMain
+                                  : Color.appMain.opacity(0.25))
+                            .frame(
+                                width:  index == currentPage ? 8 : 6,
+                                height: index == currentPage ? 8 : 6
+                            )
+                            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: currentPage)
+                    }
+                }
+                .padding(.top, 16)
+                .padding(.bottom, 20)
+
+                // 次へ / はじめる ボタン
+                Button {
+                    if currentPage < totalPages - 1 {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            currentPage += 1
+                        }
+                    } else {
                         withAnimation {
                             hasSeenOnboarding = true
                         }
-                    } label: {
-                        Text("スキップ", comment: "Onboarding skip button")
-                            .font(.body)
-                            .foregroundColor(.secondary)
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 12)
                     }
+                } label: {
+                    Text(currentPage < totalPages - 1
+                         ? String(localized: "次へ", comment: "Onboarding next button")
+                         : String(localized: "はじめる", comment: "Onboarding start button"))
+                        .fontWeight(.semibold)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 56)
+                        .background(Color.appMain)
+                        .cornerRadius(.buttonCornerRadius)
+                        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
                 }
-                .padding(.top, 8)
-                
-                // スライドコンテンツ
-                TabView(selection: $currentPage) {
-                    // スライド1: イントロダクション
-                    IntroductionSlide()
-                        .tag(0)
-                    
-                    // スライド2: 記録の仕方
-                    RecordingSlide()
-                        .tag(1)
-                    
-                    // スライド3: 振り返り
-                    AnalysisSlide()
-                        .tag(2)
-                    
-                    // スライド4: スタート
-                    StartSlide(hasSeenOnboarding: $hasSeenOnboarding)
-                        .tag(3)
-                }
-                .tabViewStyle(.page(indexDisplayMode: .always))
-                .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
+                .padding(.horizontal, 32)
+                .padding(.bottom, 40)
+                .animation(.easeInOut(duration: 0.2), value: currentPage)
             }
         }
         .preferredColorScheme(.light)
@@ -65,28 +103,26 @@ struct IntroductionSlide: View {
     var body: some View {
         VStack(spacing: 24) {
             Spacer()
-            
+
             // アイコン
             Image(systemName: "drop.fill")
                 .font(.system(size: 100))
                 .foregroundColor(.appMain)
-            
+
             VStack(spacing: 12) {
-                // ⚠️ 修正: 猫 → ペット
                 Text("ペットのお水を\n記録しよう", comment: "Onboarding title 1")
                     .font(.largeTitle)
                     .fontWeight(.bold)
                     .foregroundColor(.primary)
                     .multilineTextAlignment(.center)
-                
-                // ⚠️ 修正: 愛猫 → 大切なペット
+
                 Text("毎日の飲水量を手軽に記録して、\n大切なペットの健康管理をサポートします。", comment: "Onboarding description 1")
                     .font(.body)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
                     .lineSpacing(4)
             }
-            
+
             Spacer()
         }
         .padding(.horizontal, 32)
@@ -98,14 +134,14 @@ struct RecordingSlide: View {
     var body: some View {
         VStack(spacing: 24) {
             Spacer()
-            
+
             // タイトル
             VStack(spacing: 12) {
                 Text("器ごとに簡単記録", comment: "Onboarding title 2")
                     .font(.title)
                     .fontWeight(.bold)
                     .foregroundColor(.primary)
-                
+
                 Text("『設置』と『回収』の2ステップ。\n実際の器と同じようにカードをタップするだけ。", comment: "Onboarding description 2")
                     .font(.body)
                     .foregroundColor(.secondary)
@@ -113,25 +149,11 @@ struct RecordingSlide: View {
                     .lineSpacing(4)
             }
             .padding(.bottom, 20)
-            
-            // 簡易版カードUI（ContainerCardのミニチュア）
-            VStack(spacing: 12) {
-                // アクティブな器のカード
-                OnboardingContainerCard(
-                    name: String(localized: "白の大きい器", comment: "Sample container name 1"),
-                    isActive: true,
-                    showTime: true
-                )
-                
-                // 非アクティブな器のカード
-                OnboardingContainerCard(
-                    name: String(localized: "緑の大きい器", comment: "Sample container name 2"),
-                    isActive: false,
-                    showTime: false
-                )
-            }
-            .padding(.horizontal, 40)
-            
+
+            // 設置・回収フローのアニメーションデモ
+            OnboardingRecordingAnimationView()
+                .padding(.horizontal, 32)
+
             Spacer()
         }
         .padding(.horizontal, 32)
@@ -143,28 +165,28 @@ struct OnboardingContainerCard: View {
     let name: String
     let isActive: Bool
     let showTime: Bool
-    
+
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: "drop.fill")
                 .foregroundColor(isActive ? Color.appMain : Color.backgroundGray)
                 .font(.system(size: 24))
-            
+
             VStack(alignment: .leading, spacing: 2) {
                 Text(name)
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
-                
+
                 if showTime {
                     Text("2時間30分経過", comment: "Sample elapsed time")
                         .font(.caption2)
                         .foregroundColor(.secondary)
                 }
             }
-            
+
             Spacer()
-            
+
             Image(systemName: "pencil")
                 .font(.caption)
                 .foregroundColor(.appMain)
@@ -186,14 +208,14 @@ struct AnalysisSlide: View {
     var body: some View {
         VStack(spacing: 24) {
             Spacer()
-            
+
             // タイトル
             VStack(spacing: 12) {
                 Text("グラフで変化を把握", comment: "Onboarding title 3")
                     .font(.title)
                     .fontWeight(.bold)
                     .foregroundColor(.primary)
-                
+
                 Text("日々の飲水量や傾向をグラフで確認。\n体調変化の気づきに役立ちます。", comment: "Onboarding description 3")
                     .font(.body)
                     .foregroundColor(.secondary)
@@ -201,11 +223,11 @@ struct AnalysisSlide: View {
                     .lineSpacing(4)
             }
             .padding(.bottom, 20)
-            
+
             // グラフのイラスト
             OnboardingChartIllustration()
                 .padding(.horizontal, 40)
-            
+
             Spacer()
         }
         .padding(.horizontal, 32)
@@ -216,14 +238,14 @@ struct AnalysisSlide: View {
 struct OnboardingChartIllustration: View {
     let barHeights: [CGFloat] = [0.5, 0.7, 0.6, 0.9, 0.8, 0.7, 1.0]
     let maxHeight: CGFloat = 150
-    
+
     var body: some View {
         VStack(spacing: 16) {
             // グラフアイコン
             Image(systemName: "chart.bar.xaxis")
                 .font(.system(size: 60))
                 .foregroundColor(.appMain)
-            
+
             // 棒グラフのイラスト
             HStack(alignment: .bottom, spacing: 8) {
                 ForEach(0..<7) { index in
@@ -231,20 +253,22 @@ struct OnboardingChartIllustration: View {
                         RoundedRectangle(cornerRadius: 4)
                             .fill(index == 6 ? Color.appMain : Color.appMain.opacity(0.5))
                             .frame(width: 30, height: maxHeight * barHeights[index])
-                        
+
                         Text(dayLabel(for: index))
                             .font(.caption2)
                             .foregroundColor(.secondary)
+                            .frame(width: 30)
                     }
                 }
             }
+            .fixedSize(horizontal: true, vertical: false)
             .padding()
             .background(Color.white)
             .cornerRadius(.cardCornerRadius)
             .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
         }
     }
-    
+
     private func dayLabel(for index: Int) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale.current
@@ -258,51 +282,31 @@ struct OnboardingChartIllustration: View {
     }
 }
 
-// MARK: - スライド4: スタート
+// MARK: - スライド4: スタート（ボタンは親側で管理）
 struct StartSlide: View {
-    @Binding var hasSeenOnboarding: Bool
-    
     var body: some View {
         VStack(spacing: 24) {
             Spacer()
-            
+
             // アイコン
             Image(systemName: "heart.fill")
                 .font(.system(size: 80))
                 .foregroundColor(.appMain)
-            
+
             VStack(spacing: 12) {
                 Text("さあ、はじめましょう", comment: "Onboarding title 4")
                     .font(.largeTitle)
                     .fontWeight(.bold)
                     .foregroundColor(.primary)
-                
+
                 Text("器を登録して、今日から記録を始めましょう。", comment: "Onboarding description 4")
                     .font(.body)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
                     .lineSpacing(4)
             }
-            
+
             Spacer()
-            
-            // はじめるボタン
-            Button {
-                withAnimation {
-                    hasSeenOnboarding = true
-                }
-            } label: {
-                Text("はじめる", comment: "Onboarding start button")
-                    .fontWeight(.semibold)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 56)
-                    .background(Color.appMain)
-                    .cornerRadius(.buttonCornerRadius)
-                    .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
-            }
-            .padding(.horizontal, 32)
-            .padding(.bottom, 40)
         }
         .padding(.horizontal, 32)
     }

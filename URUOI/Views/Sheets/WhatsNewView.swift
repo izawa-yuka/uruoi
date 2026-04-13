@@ -28,21 +28,15 @@ struct WhatsNewView: View {
                     // アップデート内容リスト
                     VStack(alignment: .leading, spacing: 28) {
                         featureRow(
-                            icon: "doc.richtext",
-                            title: "PDFレポートの数値をより正確に",
-                            description: "数日まとめて入れ替えた場合でも、アプリが経過日数を考慮し、より正しい「1匹あたりの1日平均」を算出してPDFに表示するようになりました。"
-                        )
-
-                        featureRow(
-                            icon: "calendar",
-                            title: "履歴タブに曜日を追加しました",
-                            description: "履歴画面の日付に曜日（月、火など）も表示されるようになり、いつの記録なのかがひと目でわかりやすくなりました。"
+                            icon: "rectangle.and.arrow.up.right.and.arrow.down.left",
+                            title: "器の追加画面を引き上げられるように",
+                            description: "器を追加するモーダルが途中で止まってしまう不具合を修正しました。上にスワイプしてフルスクリーンでお使いいただけます。"
                         )
 
                         featureRow(
                             icon: "wrench.adjustable.fill",
-                            title: "その他の改善",
-                            description: "その他、アプリがより快適に動くように軽微な修正を行いました。"
+                            title: "その他、軽微なバグ修正",
+                            description: "アプリをより安定してご利用いただけるよう、細かな不具合を修正しました。"
                         )
                     }
                     .padding(.horizontal, 24)

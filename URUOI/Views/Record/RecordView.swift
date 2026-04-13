@@ -114,7 +114,7 @@ struct RecordView: View {
                 viewModel.calculateWeeklyAverage(using: modelContext)
             }) {
                 AddContainerSheet(viewModel: SettingsViewModel(), modelContext: modelContext)
-                    .presentationDetents([.medium]).presentationDragIndicator(.visible)
+                    .presentationDetents([.medium, .large]).presentationDragIndicator(.visible)
             }
             .sheet(isPresented: $showingReorderSheet) {
                 ReorderContainersSheet(containers: containers, modelContext: modelContext)
