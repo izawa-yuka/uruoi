@@ -128,20 +128,41 @@ struct AddContainerSheet: View {
         }
         
         // 2. 重量のバリデーション
-        let weight = emptyWeight.isEmpty ? 0.0 : (Double(emptyWeight) ?? 0.0)
+        let trimmedWeight = emptyWeight.trimmingCharacters(in: .whitespacesAndNewlines)
+        let weight: Double
+        if trimmedWeight.isEmpty {
+            weight = 0.0
+        } else if let parsedWeight = Double(trimmedWeight) {
+            weight = parsedWeight
+        } else {
+            validationMessage = "空重量は数値で入力してください"
+            showingValidationAlert = true
+            return
+        }
         if let weightError = InputValidator.validateWeight(weight) {
             validationMessage = weightError
             showingValidationAlert = true
             return
         }
+        if weight > 10000 {
+            validationMessage = "空重量は10000g以下にしてください"
+            showingValidationAlert = true
+            return
+        }
         
         // 3. バリデーション成功 - 保存処理
-        viewModel.addContainer(
-            name: containerName.trimmingCharacters(in: .whitespacesAndNewlines),
-            emptyWeight: weight,
-            modelContext: modelContext
-        )
-        dismiss()
+        Task {
+            let didSave = await viewModel.addContainer(
+                name: containerName.trimmingCharacters(in: .whitespacesAndNewlines),
+                emptyWeight: weight,
+                modelContext: modelContext
+            )
+            if didSave {
+                dismiss()
+            } else {
+                validationMessage = viewModel.lastError ?? "器の追加に失敗しました"
+                showingValidationAlert = true
+            }
+        }
     }
 }
-

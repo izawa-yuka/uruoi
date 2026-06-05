@@ -15,7 +15,7 @@ struct FamilySharingView: View {
     @AppStorage("householdID") private var householdID: String = ""
     // 自分が作成した共有用IDの履歴
     @AppStorage("createdHouseholdID") private var createdHouseholdID: String = ""
-    
+
     @State private var isMigrating = false
     @State private var joinInputID = ""
     @State private var errorMessage = ""
@@ -40,10 +40,10 @@ struct FamilySharingView: View {
                 }
                 .padding(.vertical, 8)
             }
-            
+
             if householdID.isEmpty {
                 // MARK: - 未設定の場合
-                
+
                 // 1. 新しく共有用IDを作成する（または復元）
                 Section(header: Text("はじめての方")) {
                     if !createdHouseholdID.isEmpty {
@@ -52,7 +52,7 @@ struct FamilySharingView: View {
                             Text("以前作成した共有用IDが見つかりました")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
-                            
+
                             Button {
                                 let idToRestore = createdHouseholdID
                                 isMigrating = true
@@ -90,9 +90,9 @@ struct FamilySharingView: View {
                                 }
                             }
                             .disabled(isMigrating)
-                            
+
                             Divider()
-                            
+
                             Button {
                                 showingRecreateAlert = true
                             } label: {
@@ -103,7 +103,7 @@ struct FamilySharingView: View {
                             .disabled(isMigrating)
                         }
                         .padding(.vertical, 4)
-                        
+
                     } else {
                         // 履歴がない場合：通常通り新規作成
                         Button {
@@ -119,7 +119,7 @@ struct FamilySharingView: View {
                         .disabled(isMigrating)
                     }
                 }
-                
+
                 // 2. 既存の共有に参加する
                 Section(header: Text("家族から招待された方")) {
                     VStack(alignment: .leading) {
@@ -127,7 +127,7 @@ struct FamilySharingView: View {
                             .textFieldStyle(.roundedBorder)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled(true)
-                        
+
                         Button {
                             // いきなり参加せず、確認アラートを出す
                             if !joinInputID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
@@ -143,23 +143,23 @@ struct FamilySharingView: View {
                     }
                     .padding(.vertical, 4)
                 }
-                
+
             } else {
                 // MARK: - 設定済みの場合
-                
+
                 Section(header: Text("現在の共有設定")) {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("共有用ID")
                             .font(.caption)
                             .foregroundStyle(.secondary)
-                        
+
                         HStack {
                             Text(householdID)
                                 .font(.system(.body, design: .monospaced))
                                 .fontWeight(.bold)
-                            
+
                             Spacer()
-                            
+
                             Button {
                                 UIPasteboard.general.string = householdID
                                 successMessage = "IDをコピーしました"
@@ -172,12 +172,12 @@ struct FamilySharingView: View {
                         }
                     }
                     .padding(.vertical, 4)
-                    
+
                     Text("このIDを家族に伝えて、「共有を受ける」をしてもらうことでデータを共有できます。")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
-                
+
                 Section {
                     Button(role: .destructive) {
                         // ログアウト処理（IDを消すだけ。データはクラウドに残る）
@@ -189,7 +189,7 @@ struct FamilySharingView: View {
                     Text("共有を解除してもデータは消えません。再度同じIDを入力すれば元に戻ります。")
                 }
             }
-            
+
             // MARK: - 進捗表示
             if isMigrating {
                 Section {
@@ -240,14 +240,14 @@ struct FamilySharingView: View {
             Text("新しくIDを作成すると、以前のID履歴が上書きされます。\n（古いIDのデータはクラウドに残りますが、このアプリからはアクセスできなくなります）\n\nよろしいですか？")
         }
     }
-    
+
     // MARK: - Actions
-    
+
     /// 新しい共有用IDを作成し、データを移行する
     private func createHousehold() {
         isMigrating = true
         let newID = UUID().uuidString
-        
+
         Task {
             do {
                 // 1. 匿名ログイン（未ログインの場合のみ）
@@ -255,18 +255,18 @@ struct FamilySharingView: View {
                     let result = try await Auth.auth().signInAnonymously()
                     print("✅ Firebase匿名ログイン成功: User ID: \(result.user.uid)")
                 }
-                
+
                 // 2. ローカルデータを移行（ログイン完了後）
                 try await DataMigrationService.shared.migrateToFirestore(householdID: newID, context: modelContext)
-                
+
                 // 3. 成功したらIDを保存
                 DispatchQueue.main.async {
                     self.householdID = newID
                     self.createdHouseholdID = newID // 履歴にも保存
-                    
+
                     // Force Sync Start
                     DataSyncService.shared.startSync(householdID: newID, modelContext: self.modelContext)
-                    
+
                     self.isMigrating = false
                     self.successMessage = "共有用IDを作成しました！\nまずは古いデータがクラウドにコピーされました。"
                     self.showingSuccessAlert = true
@@ -280,49 +280,55 @@ struct FamilySharingView: View {
             }
         }
     }
-    
+
     /// 既存の共有に参加する（確認後の実行）
     /// 既存の共有に参加する（確認後の実行）
     /// - Parameter id: 参加または復元するID
     private func confirmJoinHousehold(id: String) {
         let targetID = id.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !targetID.isEmpty else { return }
-        
+
         isMigrating = true // ロック
-        
+
         Task {
             do {
-                // 1. ローカルデータを全削除
-                try DataMigrationService.shared.clearLocalData(context: modelContext)
-                
-                // 2. IDを設定（これによりContentViewで同期が開始される）
+                // 1. 匿名ログイン（未ログインの場合のみ）
+                if Auth.auth().currentUser == nil {
+                    let result = try await Auth.auth().signInAnonymously()
+                    print("✅ Firebase匿名ログイン成功: User ID: \(result.user.uid)")
+                }
+
+                // 2. 共有先データを先に取得できることを確認してから、ローカルを置き換える。
+                try await DataMigrationService.shared.replaceLocalDataFromCloud(householdID: targetID, context: modelContext)
+
+                // 3. IDを設定（これによりContentViewで同期が開始される）
                 DispatchQueue.main.async {
                     self.householdID = targetID
-                    
+
                     // Force Sync Start
                     DataSyncService.shared.startSync(householdID: targetID, modelContext: self.modelContext)
-                    
+
                     self.isMigrating = false
-                    
+
                     if targetID == self.createdHouseholdID {
                          self.successMessage = "以前のIDを復元しました！\nまもなくデータが同期されます。"
                     } else {
                          self.successMessage = "共有を受けました！\nまもなくデータが同期されます。"
                     }
-                    
+
                     self.showingSuccessAlert = true
                     self.joinInputID = "" // 入力欄クリア
                 }
             } catch {
                 DispatchQueue.main.async {
                     self.isMigrating = false
-                    self.errorMessage = "データの削除に失敗しました。\n\(error.localizedDescription)"
+                    self.errorMessage = "共有データの取得に失敗しました。\n\(error.localizedDescription)"
                     self.showingErrorAlert = true
                 }
             }
         }
     }
-    
+
     // 古い joinHousehold は削除
 }
 

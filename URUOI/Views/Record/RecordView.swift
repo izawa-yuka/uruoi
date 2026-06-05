@@ -103,15 +103,17 @@ struct RecordView: View {
             
             .sheet(item: $selectedContainer, onDismiss: {
                 viewModel.refreshActiveRecords(using: modelContext)
-                viewModel.checkHealthAlert(using: modelContext)
                 viewModel.calculateWeeklyAverage(using: modelContext)
+                viewModel.calculateTodayTotalPerCat(using: modelContext)
+                viewModel.checkHealthAlert(using: modelContext)
             }) { container in
                 ContainerDetailView(container: container)
             }
             .sheet(isPresented: $showingAddContainerSheet, onDismiss: {
                 viewModel.refreshActiveRecords(using: modelContext)
-                viewModel.checkHealthAlert(using: modelContext)
                 viewModel.calculateWeeklyAverage(using: modelContext)
+                viewModel.calculateTodayTotalPerCat(using: modelContext)
+                viewModel.checkHealthAlert(using: modelContext)
             }) {
                 AddContainerSheet(viewModel: SettingsViewModel(), modelContext: modelContext)
                     .presentationDetents([.medium, .large]).presentationDragIndicator(.visible)
@@ -136,14 +138,16 @@ struct RecordView: View {
             } message: { if let errorMessage = viewModel.lastError { Text(errorMessage) } }
             .onAppear {
                 viewModel.setModelContext(modelContext)
-                viewModel.checkHealthAlert(using: modelContext)
                 viewModel.calculateWeeklyAverage(using: modelContext)
+                viewModel.calculateTodayTotalPerCat(using: modelContext)
+                viewModel.checkHealthAlert(using: modelContext)
                 viewModel.triggerUIUpdate()
             }
             .onChange(of: allRecords) { _, _ in
                 viewModel.refreshActiveRecords(using: modelContext)
-                viewModel.checkHealthAlert(using: modelContext)
                 viewModel.calculateWeeklyAverage(using: modelContext)
+                viewModel.calculateTodayTotalPerCat(using: modelContext)
+                viewModel.checkHealthAlert(using: modelContext)
             }
             .onChange(of: viewModel.lastUpdateTimestamp) { _, _ in
                 viewModel.checkHealthAlert(using: modelContext)
@@ -235,6 +239,7 @@ struct ReorderContainersSheet: View {
     let modelContext: ModelContext
     @Environment(\.dismiss) private var dismiss
     @State private var editableContainers: [ContainerMaster] = []
+    @State private var showingSaveError = false
     
     var body: some View {
         NavigationStack {
@@ -281,14 +286,24 @@ struct ReorderContainersSheet: View {
                     Button { dismiss() } label: { Image(systemName: "xmark") }
                 }
             }
+            .alert("保存に失敗しました", isPresented: $showingSaveError) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("器の並び順を保存できませんでした。もう一度お試しください。")
+            }
             .onAppear { editableContainers = containers }
         }
     }
-    
+
     private func saveOrder() {
         for (index, container) in editableContainers.enumerated() { container.sortOrder = index }
-        try? modelContext.save()
-        dismiss()
+        do {
+            try modelContext.save()
+            dismiss()
+        } catch {
+            modelContext.rollback()
+            showingSaveError = true
+        }
     }
 }
 

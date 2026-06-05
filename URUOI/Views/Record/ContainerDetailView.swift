@@ -91,14 +91,14 @@ struct ContainerDetailView: View {
             }
             .sheet(isPresented: $showingStartSheet, onDismiss: {
                 loadHistory(); viewModel.refreshActiveRecords(using: modelContext)
-                viewModel.checkHealthAlert(using: modelContext); viewModel.calculateWeeklyAverage(using: modelContext)
+                viewModel.calculateWeeklyAverage(using: modelContext); viewModel.calculateTodayTotalPerCat(using: modelContext); viewModel.checkHealthAlert(using: modelContext)
             }) {
                 StartRecordingSheet(container: container, viewModel: viewModel, modelContext: modelContext, catCount: catCount)
                     .presentationDetents([.medium, .large]).presentationDragIndicator(.visible)
             }
             .sheet(isPresented: $showingFinishSheet, onDismiss: {
                 loadHistory(); viewModel.refreshActiveRecords(using: modelContext)
-                viewModel.checkHealthAlert(using: modelContext); viewModel.calculateWeeklyAverage(using: modelContext)
+                viewModel.calculateWeeklyAverage(using: modelContext); viewModel.calculateTodayTotalPerCat(using: modelContext); viewModel.checkHealthAlert(using: modelContext)
             }) {
                 FinishRecordingSheet(container: container, viewModel: viewModel, modelContext: modelContext, catCount: catCount)
                     .presentationDetents([.medium, .large]).presentationDragIndicator(.visible)
@@ -106,14 +106,15 @@ struct ContainerDetailView: View {
             .sheet(item: $selectedRecordForEdit, onDismiss: {
                 loadHistory()
                 viewModel.refreshActiveRecords(using: modelContext)
-                viewModel.checkHealthAlert(using: modelContext)
                 viewModel.calculateWeeklyAverage(using: modelContext)
+                viewModel.calculateTodayTotalPerCat(using: modelContext)
+                viewModel.checkHealthAlert(using: modelContext)
             }) { record in
-                RecordEditSheet(record: record)
+                RecordEditSheet(record: record, viewModel: viewModel)
             }
             .onAppear { viewModel.setModelContext(modelContext); loadHistory(); viewModel.checkHealthAlert(using: modelContext) }
-            .onChange(of: isActive) { _, _ in loadHistory(); viewModel.checkHealthAlert(using: modelContext) }
-            .onChange(of: historyRecords) { _, _ in viewModel.checkHealthAlert(using: modelContext) }
+            .onChange(of: isActive) { _, _ in loadHistory(); viewModel.calculateTodayTotalPerCat(using: modelContext); viewModel.checkHealthAlert(using: modelContext) }
+            .onChange(of: historyRecords) { _, _ in viewModel.calculateTodayTotalPerCat(using: modelContext); viewModel.checkHealthAlert(using: modelContext) }
             .alert("エラーが発生しました", isPresented: $viewModel.showError) {
                 Button("OK", role: .cancel) { viewModel.clearError() }
             } message: {
@@ -189,8 +190,14 @@ struct StartRecordingSheet: View {
         if weight > maxInputWeight { validationMessage = "10,000g以下の値を入力してください"; showingValidationAlert = true; return }
         if let weightError = InputValidator.validateWeight(weight) { validationMessage = weightError; showingValidationAlert = true; return }
         let trimmedNote = note.trimmingCharacters(in: .whitespacesAndNewlines)
-        viewModel.startRecording(container: container, startWeight: weight, catCount: catCount, note: trimmedNote.isEmpty ? nil : trimmedNote, date: recordDate, modelContext: modelContext)
-        dismiss()
+        Task {
+            if await viewModel.startRecording(container: container, startWeight: weight, catCount: catCount, note: trimmedNote.isEmpty ? nil : trimmedNote, date: recordDate, modelContext: modelContext) {
+                dismiss()
+            } else {
+                validationMessage = viewModel.lastError ?? String(localized: "記録の開始に失敗しました")
+                showingValidationAlert = true
+            }
+        }
     }
 }
 
@@ -291,18 +298,51 @@ struct FinishRecordingSheet: View {
         guard let weight = Double(endWeight) else { return }
         if weight > maxInputWeight { validationMessage = "回収時重量は10,000g以下にしてください"; showingValidationAlert = true; return }
         if let weightError = InputValidator.validateWeight(weight) { validationMessage = "回収時の重量: \(weightError)"; showingValidationAlert = true; return }
-        let temp = temperature.isEmpty ? nil : Double(temperature)
+        let trimmedTemperature = temperature.trimmingCharacters(in: .whitespacesAndNewlines)
+        let temp: Double?
+        if trimmedTemperature.isEmpty {
+            temp = nil
+        } else if let parsedTemperature = Double(trimmedTemperature) {
+            if let temperatureError = InputValidator.validateTemperature(parsedTemperature) {
+                validationMessage = "室温: \(temperatureError)"
+                showingValidationAlert = true
+                return
+            }
+            temp = parsedTemperature
+        } else {
+            validationMessage = "室温は数値で入力してください"
+            showingValidationAlert = true
+            return
+        }
         let weatherSymbol = selectedWeather?.sfSymbolName
         let trimmedNote = note.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedNextWeight = nextStartWeight.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !trimmedNextWeight.isEmpty, let nextWeight = Double(trimmedNextWeight) {
+        if !trimmedNextWeight.isEmpty {
+            guard let nextWeight = Double(trimmedNextWeight) else {
+                validationMessage = "次回の重量は数値で入力してください"
+                showingValidationAlert = true
+                return
+            }
             if nextWeight > maxInputWeight { validationMessage = "次回の重量は10,000g以下にしてください"; showingValidationAlert = true; return }
             if let nextWeightError = InputValidator.validateWeight(nextWeight) { validationMessage = "次回の重量: \(nextWeightError)"; showingValidationAlert = true; return }
-            viewModel.finishAndRestartRecording(container: container, endWeight: weight, weatherCondition: weatherSymbol, temperature: temp, catCount: catCount, note: trimmedNote.isEmpty ? nil : trimmedNote, nextStartWeight: nextWeight, date: recordDate, modelContext: modelContext)
+            Task {
+                if await viewModel.finishAndRestartRecording(container: container, endWeight: weight, weatherCondition: weatherSymbol, temperature: temp, catCount: catCount, note: trimmedNote.isEmpty ? nil : trimmedNote, nextStartWeight: nextWeight, date: recordDate, modelContext: modelContext) {
+                    dismiss()
+                } else {
+                    validationMessage = viewModel.lastError ?? String(localized: "記録の更新に失敗しました")
+                    showingValidationAlert = true
+                }
+            }
         } else {
-            viewModel.finishRecording(container: container, endWeight: weight, weatherCondition: weatherSymbol, temperature: temp, catCount: catCount, note: trimmedNote.isEmpty ? nil : trimmedNote, date: recordDate, modelContext: modelContext)
+            Task {
+                if await viewModel.finishRecording(container: container, endWeight: weight, weatherCondition: weatherSymbol, temperature: temp, catCount: catCount, note: trimmedNote.isEmpty ? nil : trimmedNote, date: recordDate, modelContext: modelContext) {
+                    dismiss()
+                } else {
+                    validationMessage = viewModel.lastError ?? String(localized: "記録の更新に失敗しました")
+                    showingValidationAlert = true
+                }
+            }
         }
-        dismiss()
     }
 }
 
@@ -374,16 +414,38 @@ struct EditContainerSheet: View {
     
     private func saveChanges() {
         if let nameError = InputValidator.validateName(editedName) { validationMessage = nameError; showingValidationAlert = true; return }
-        let weight = editedEmptyWeight.isEmpty ? 0.0 : (Double(editedEmptyWeight) ?? 0.0)
+        let trimmedWeight = editedEmptyWeight.trimmingCharacters(in: .whitespacesAndNewlines)
+        let weight: Double
+        if trimmedWeight.isEmpty {
+            weight = 0.0
+        } else if let parsedWeight = Double(trimmedWeight) {
+            weight = parsedWeight
+        } else {
+            validationMessage = "空重量は数値で入力してください"
+            showingValidationAlert = true
+            return
+        }
         if weight > maxInputWeight { validationMessage = "空重量は10,000g以下にしてください"; showingValidationAlert = true; return }
         if let weightError = InputValidator.validateWeight(weight) { validationMessage = weightError; showingValidationAlert = true; return }
-        viewModel.updateContainer(container: container, newName: editedName.trimmingCharacters(in: .whitespacesAndNewlines), newEmptyWeight: weight, modelContext: modelContext)
-        dismiss()
+        Task {
+            if await viewModel.updateContainer(container: container, newName: editedName.trimmingCharacters(in: .whitespacesAndNewlines), newEmptyWeight: weight, modelContext: modelContext) {
+                dismiss()
+            } else {
+                validationMessage = viewModel.lastError ?? String(localized: "器の情報の更新に失敗しました")
+                showingValidationAlert = true
+            }
+        }
     }
     
     private func deleteContainer() {
-        settingsViewModel.deleteContainer(container, modelContext: modelContext)
-        dismiss(); onDelete()
+        Task {
+            if await settingsViewModel.deleteContainer(container, modelContext: modelContext) {
+                dismiss(); onDelete()
+            } else {
+                validationMessage = settingsViewModel.lastError ?? String(localized: "器の情報の更新に失敗しました")
+                showingValidationAlert = true
+            }
+        }
     }
 }
 
@@ -391,6 +453,7 @@ struct RecordEditSheet: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Bindable var record: WaterRecord
+    let viewModel: RecordViewModel
     @State private var tempStartTime: Date
     @State private var tempStartWeight: String
     @State private var tempEndTime: Date
@@ -399,8 +462,9 @@ struct RecordEditSheet: View {
     @State private var showingValidationAlert = false
     @State private var validationMessage = ""
     
-    init(record: WaterRecord) {
+    init(record: WaterRecord, viewModel: RecordViewModel) {
         self.record = record
+        self.viewModel = viewModel
         _tempStartTime = State(initialValue: record.startTime)
         _tempStartWeight = State(initialValue: String(Int(record.startWeight)))
         if let end = record.endTime { _tempEndTime = State(initialValue: end) } else { _tempEndTime = State(initialValue: Date()) }
@@ -444,33 +508,53 @@ struct RecordEditSheet: View {
     private func saveChanges() {
         guard let startW = Double(tempStartWeight) else { return }
         if startW > maxInputWeight { validationMessage = "設置時重量は10,000g以下にしてください"; showingValidationAlert = true; return }
+        if let weightError = InputValidator.validateWeight(startW) { validationMessage = weightError; showingValidationAlert = true; return }
         if isCollection, let endW = Double(tempEndWeight) {
-             if endW > maxInputWeight { validationMessage = "回収時重量は10,000g以下にしてください"; showingValidationAlert = true; return }
+            if endW > maxInputWeight { validationMessage = "回収時重量は10,000g以下にしてください"; showingValidationAlert = true; return }
+            if let weightError = InputValidator.validateWeight(endW) { validationMessage = weightError; showingValidationAlert = true; return }
+            if let consumptionError = InputValidator.validateWaterConsumption(startWeight: startW, endWeight: endW) { validationMessage = consumptionError; showingValidationAlert = true; return }
+        } else if isCollection {
+            validationMessage = "回収時重量を入力してください"
+            showingValidationAlert = true
+            return
         }
-        record.startTime = tempStartTime; record.startWeight = startW
-        if isCollection {
-            record.endTime = tempEndTime
-            if let w = Double(tempEndWeight) { record.endWeight = w }
+        Task {
+            let didSave: Bool
+            if isCollection {
+                didSave = await viewModel.updateRecord(
+                    record: record,
+                    newStartTime: tempStartTime,
+                    newEndTime: tempEndTime,
+                    newStartWeight: startW,
+                    newEndWeight: Double(tempEndWeight),
+                    newNote: record.note,
+                    modelContext: modelContext
+                )
+            } else {
+                didSave = await viewModel.updateStartRecord(
+                    record: record,
+                    newStartTime: tempStartTime,
+                    newStartWeight: startW,
+                    newNote: record.note,
+                    modelContext: modelContext
+                )
+            }
+            if didSave {
+                dismiss()
+            } else {
+                validationMessage = viewModel.lastError ?? String(localized: "記録の更新に失敗しました")
+                showingValidationAlert = true
+            }
         }
-        try? modelContext.save(); dismiss()
     }
     
     private func deleteRecord() {
-        // 1. 必要なIDとContextを退避（オブジェクトそのものは触らない）
-        let recordID = record.persistentModelID
-        let context = modelContext
-        
-        // 2. 先に画面を閉じる（ユーザーには即座に反応）
-        dismiss()
-        
-        // 3. 画面が完全に消え、親の再描画も終わった頃を見計らって削除
-        Task { @MainActor in
-            // 1.0秒待機（アニメーションと競合しない十分な時間）
-            try? await Task.sleep(for: .seconds(1.0))
-            
-            // IDを使ってひっそりと削除
-            if let targetRecord = context.model(for: recordID) as? WaterRecord {
-                context.delete(targetRecord)
+        Task {
+            if await viewModel.deleteRecord(record, modelContext: modelContext) {
+                dismiss()
+            } else {
+                validationMessage = viewModel.lastError ?? String(localized: "記録の削除に失敗しました")
+                showingValidationAlert = true
             }
         }
     }
@@ -582,7 +666,13 @@ struct ContainerTimelineRow: View {
             Spacer()
             VStack(alignment: .trailing, spacing: 4) {
                 if item.type == .setup { Text("\(item.weight.safeDisplayInt)g").monospacedDigit() }
-                else if let amount = item.amount { Text("\(amount.safeDisplayInt)ml").fontWeight(.bold).monospacedDigit() }
+                else if let amount = item.amount {
+                    Text("\(amount.safeDisplayInt)ml").fontWeight(.bold).monospacedDigit()
+                    Text(String(localized: "回収時の重さ: \(item.weight.safeDisplayInt)g"))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .monospacedDigit()
+                }
             }
             Image(systemName: "chevron.right").font(.caption).foregroundColor(.secondary.opacity(0.5)).padding(.leading, 4).padding(.top, 4)
         }

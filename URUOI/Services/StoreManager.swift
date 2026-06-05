@@ -14,6 +14,8 @@ final class StoreManager {
     
     var isProMember: Bool = false
     var products: [Product] = []
+    var isLoadingProducts: Bool = false
+    var productLoadError: String?
     private var updates: Task<Void, Never>? = nil
 
     private init() {
@@ -50,41 +52,73 @@ final class StoreManager {
     
     @MainActor
     func loadProducts() async {
+        isLoadingProducts = true
+        productLoadError = nil
+        defer { isLoadingProducts = false }
         do {
-            self.products = try await Product.products(for: ProductID.all)
+            self.products = try await Product.products(for: ProductID.all).sorted { $0.id < $1.id }
         } catch {
+            productLoadError = error.localizedDescription
             print("Failed to load products: \(error)")
         }
     }
+
+    func product(for id: String) -> Product? {
+        products.first { $0.id == id }
+    }
+
+    func displayPrice(for id: String) -> String {
+        product(for: id)?.displayPrice ?? String(localized: "読み込み中")
+    }
+
+    func isProductLoaded(_ id: String) -> Bool {
+        product(for: id) != nil
+    }
     
     @MainActor
-    func purchaseLifetime() async {
+    func purchaseLifetime() async -> Bool {
         guard let product = products.first(where: { $0.id == ProductID.lifetime }) else {
             print("Lifetime product not found")
-            return
+            return false
         }
-        try? await purchase(product)
+        do {
+            return try await purchase(product)
+        } catch {
+            print("Lifetime purchase failed: \(error)")
+            return false
+        }
     }
     
     @MainActor
-    func purchaseSubscription(planId: String) async {
+    func purchaseSubscription(planId: String) async -> Bool {
         guard let product = products.first(where: { $0.id == planId }) else {
             print("Subscription product \(planId) not found")
-            return
+            return false
         }
-        try? await purchase(product)
+        do {
+            return try await purchase(product)
+        } catch {
+            print("Subscription purchase failed: \(error)")
+            return false
+        }
     }
     
+    enum RestoreResult {
+        case restored
+        case noPurchase
+    }
+
     @MainActor
-    func restorePurchases() async throws {
-        try? await AppStore.sync()
+    func restorePurchases() async throws -> RestoreResult {
+        try await AppStore.sync()
         await updatePurchasedStatus()
+        return isProMember ? .restored : .noPurchase
     }
     
     // MARK: - Internal Logic
     
     @MainActor
-    private func purchase(_ product: Product) async throws {
+    private func purchase(_ product: Product) async throws -> Bool {
         let result = try await product.purchase()
         
         switch result {
@@ -97,11 +131,12 @@ final class StoreManager {
             
             // トランザクション完了
             await transaction.finish()
+            return true
             
         case .userCancelled, .pending:
-            break
+            return false
         @unknown default:
-            break
+            return false
         }
     }
 
@@ -183,4 +218,3 @@ final class StoreManager {
         case failedVerification
     }
 }
-

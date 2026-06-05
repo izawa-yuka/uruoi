@@ -58,15 +58,9 @@ final class PDFReportGenerator {
             return Data()
         }
 
-        // 期間内のレコードをフィルタ
-        let filteredRecords = records.filter { record in
-            guard let endTime = record.endTime else { return false }
-            return endTime >= interval.start && endTime < interval.end
-        }
-
         // 日別データを集計
         let dailyData = aggregateDailyData(
-            records: filteredRecords,
+            records: records,
             interval: interval,
             numberOfPets: numberOfPets,
             calendar: calendar
@@ -134,23 +128,27 @@ final class PDFReportGenerator {
     ) -> [DailyReportData] {
         let petCount = max(numberOfPets, 1)
 
-        // 日ごとにグループ化
-        var dailyMap: [Date: (amount: Double, durationDays: Double, weather: String?, temperature: Double?)] = [:]
+        let dailyTotals = WaterIntakeCalculator.dailyTotals(from: records, in: interval, calendar: calendar)
+        var dailyMetadata: [Date: (weather: String?, temperature: Double?)] = [:]
 
         for record in records {
-            guard let endTime = record.endTime, let amount = record.amount else { continue }
-            let dayStart = calendar.startOfDay(for: endTime)
+            guard let endTime = record.endTime,
+                  WaterIntakeCalculator.normalizedDailyAmount(for: record, calendar: calendar) != nil else { continue }
 
-            let durationSeconds = max(endTime.timeIntervalSince(record.startTime), 0)
-            let daysPassed = durationSeconds / 86400.0
+            let startDay = calendar.startOfDay(for: record.startTime)
+            let endDay = calendar.startOfDay(for: endTime)
 
-            var existing = dailyMap[dayStart] ?? (amount: 0, durationDays: 0, weather: nil, temperature: nil)
-            existing.amount += amount
-            existing.durationDays += daysPassed
-            // 天気・気温は最初に見つかったものを使う
-            if existing.weather == nil { existing.weather = record.weatherCondition }
-            if existing.temperature == nil { existing.temperature = record.temperature }
-            dailyMap[dayStart] = existing
+            if calendar.isDate(startDay, inSameDayAs: endDay) {
+                setMetadata(for: startDay, record: record, metadata: &dailyMetadata, interval: interval)
+                continue
+            }
+
+            var day = startDay
+            while day < endDay {
+                setMetadata(for: day, record: record, metadata: &dailyMetadata, interval: interval)
+                guard let nextDay = calendar.date(byAdding: .day, value: 1, to: day) else { break }
+                day = nextDay
+            }
         }
 
         // 期間内の全日を生成（データがない日も含む）
@@ -158,21 +156,16 @@ final class PDFReportGenerator {
         var dateIterator = interval.start
         while dateIterator < interval.end {
             let dayStart = calendar.startOfDay(for: dateIterator)
-            let entry = dailyMap[dayStart]
-            let totalAmount = entry?.amount ?? 0
-
-            let durationDays = entry?.durationDays ?? 0
-            // 計測日数が1日未満の場合は過剰なペース換算を防ぐために1で割る、複数日の場合はその日数で割る
-            let normalizedDays = max(durationDays, 1.0)
-            let dailyRate = totalAmount / normalizedDays
-            let perCatAmount = dailyRate / Double(petCount)
+            let totalAmount = dailyTotals[dayStart] ?? 0
+            let metadata = dailyMetadata[dayStart]
+            let perCatAmount = totalAmount / Double(petCount)
 
             result.append(DailyReportData(
                 date: dayStart,
                 totalAmount: totalAmount,
                 perCatAmount: perCatAmount,
-                weather: entry?.weather,
-                temperature: entry?.temperature
+                weather: metadata?.weather,
+                temperature: metadata?.temperature
             ))
 
             guard let nextDay = calendar.date(byAdding: .day, value: 1, to: dateIterator) else { break }
@@ -180,6 +173,19 @@ final class PDFReportGenerator {
         }
 
         return result
+    }
+
+    private static func setMetadata(
+        for day: Date,
+        record: WaterRecord,
+        metadata: inout [Date: (weather: String?, temperature: Double?)],
+        interval: DateInterval
+    ) {
+        guard day >= interval.start && day < interval.end else { return }
+        var existing = metadata[day] ?? (weather: nil, temperature: nil)
+        if existing.weather == nil { existing.weather = record.weatherCondition }
+        if existing.temperature == nil { existing.temperature = record.temperature }
+        metadata[day] = existing
     }
 
     // MARK: - 描画メソッド

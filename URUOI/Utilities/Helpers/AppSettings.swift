@@ -12,23 +12,29 @@ import SwiftUI
 @Observable
 final class AppSettings {
     static let shared = AppSettings()
-    
+
     @ObservationIgnored
     @AppStorage("numberOfPets") var numberOfPets: Int = 1
-    
+
     @ObservationIgnored
     @AppStorage("alertThreshold") var alertThreshold: Int = 50 // ml
-    
+
     @ObservationIgnored
     @AppStorage("isProMember") var isProMember: Bool = false
-    
+
     // 【重要】ここが追加されている必要があります
     @ObservationIgnored
     @ObservationIgnored
     @AppStorage("waterReminderDays") var waterReminderDays: Int = 1
-    
+
     @ObservationIgnored
     @AppStorage("isWaterAlertEnabled") var isWaterAlertEnabled: Bool = true
-    
+
+    @ObservationIgnored
+    @AppStorage("isHealthAlertEnabled") var isHealthAlertEnabled: Bool = true
+
+    @ObservationIgnored
+    @AppStorage("healthAlertThreshold") var healthAlertThreshold: Int = 200
+
     private init() {}
 }

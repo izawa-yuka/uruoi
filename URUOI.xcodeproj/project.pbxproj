@@ -13,6 +13,7 @@
 
 /* Begin PBXFileReference section */
 		CE3EC2492F06779900A2C0CF /* URUOI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = URUOI.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CE9A10012F40A00100A00001 /* URUOITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = URUOITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -34,6 +35,11 @@
 			path = URUOI;
 			sourceTree = "<group>";
 		};
+		CE9A10022F40A00100A00001 /* URUOITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = URUOITests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -46,6 +52,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CE9A10032F40A00100A00001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -53,6 +66,7 @@
 			isa = PBXGroup;
 			children = (
 				CE3EC24B2F06779900A2C0CF /* URUOI */,
+				CE9A10022F40A00100A00001 /* URUOITests */,
 				CE3EC24A2F06779900A2C0CF /* Products */,
 			);
 			sourceTree = "<group>";
@@ -61,11 +75,22 @@
 			isa = PBXGroup;
 			children = (
 				CE3EC2492F06779900A2C0CF /* URUOI.app */,
+				CE9A10012F40A00100A00001 /* URUOITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
+
+/* Begin PBXContainerItemProxy section */
+		CE9A10042F40A00100A00001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CE3EC2412F06779900A2C0CF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CE3EC2482F06779900A2C0CF;
+			remoteInfo = URUOI;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXNativeTarget section */
 		CE3EC2482F06779900A2C0CF /* URUOI */ = {
@@ -92,6 +117,29 @@
 			productReference = CE3EC2492F06779900A2C0CF /* URUOI.app */;
 			productType = "com.apple.product-type.application";
 		};
+		CE9A10062F40A00100A00001 /* URUOITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CE9A100B2F40A00100A00001 /* Build configuration list for PBXNativeTarget "URUOITests" */;
+			buildPhases = (
+				CE9A10072F40A00100A00001 /* Sources */,
+				CE9A10032F40A00100A00001 /* Frameworks */,
+				CE9A10082F40A00100A00001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CE9A10052F40A00100A00001 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				CE9A10022F40A00100A00001 /* URUOITests */,
+			);
+			name = URUOITests;
+			packageProductDependencies = (
+			);
+			productName = URUOITests;
+			productReference = CE9A10012F40A00100A00001 /* URUOITests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -104,6 +152,10 @@
 				TargetAttributes = {
 					CE3EC2482F06779900A2C0CF = {
 						CreatedOnToolsVersion = 26.2;
+					};
+					CE9A10062F40A00100A00001 = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = CE3EC2482F06779900A2C0CF;
 					};
 				};
 			};
@@ -126,12 +178,20 @@
 			projectRoot = "";
 			targets = (
 				CE3EC2482F06779900A2C0CF /* URUOI */,
+				CE9A10062F40A00100A00001 /* URUOITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		CE3EC2472F06779900A2C0CF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CE9A10082F40A00100A00001 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -148,7 +208,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CE9A10072F40A00100A00001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		CE9A10052F40A00100A00001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CE3EC2482F06779900A2C0CF /* URUOI */;
+			targetProxy = CE9A10042F40A00100A00001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		CE3EC2542F06779B00A2C0CF /* Debug */ = {
@@ -354,6 +429,60 @@
 			};
 			name = Release;
 		};
+		CE9A10092F40A00100A00001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 44W2CS8RDU;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kinakodaifuku.URUOI.Tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/URUOI.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/URUOI";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Debug;
+		};
+		CE9A100A2F40A00100A00001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 44W2CS8RDU;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kinakodaifuku.URUOI.Tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/URUOI.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/URUOI";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -371,6 +500,15 @@
 			buildConfigurations = (
 				CE3EC2572F06779B00A2C0CF /* Debug */,
 				CE3EC2582F06779B00A2C0CF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CE9A100B2F40A00100A00001 /* Build configuration list for PBXNativeTarget "URUOITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CE9A10092F40A00100A00001 /* Debug */,
+				CE9A100A2F40A00100A00001 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

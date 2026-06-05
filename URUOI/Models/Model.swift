@@ -74,6 +74,69 @@ final class ContainerMaster {
     }
 }
 
+// MARK: - WaterIntakeCalculator
+/// 複数日置いた水を、設置日から回収日前日までの日別飲水量として配分する。
+enum WaterIntakeCalculator {
+    static func normalizedDailyAmount(for record: WaterRecord, calendar: Calendar = .current) -> Double? {
+        guard let amount = record.amount, amount > 0, record.endTime != nil else { return nil }
+        return amount / Double(allocationDayCount(for: record, calendar: calendar))
+    }
+
+    static func dailyTotals(
+        from records: [WaterRecord],
+        in interval: DateInterval,
+        calendar: Calendar = .current
+    ) -> [Date: Double] {
+        var totals: [Date: Double] = [:]
+
+        for record in records {
+            guard let dailyAmount = normalizedDailyAmount(for: record, calendar: calendar),
+                  let endTime = record.endTime else { continue }
+
+            let startDay = calendar.startOfDay(for: record.startTime)
+            let endDay = calendar.startOfDay(for: endTime)
+
+            if calendar.isDate(startDay, inSameDayAs: endDay) {
+                add(dailyAmount, on: startDay, to: &totals, in: interval)
+                continue
+            }
+
+            var day = startDay
+            while day < endDay {
+                add(dailyAmount, on: day, to: &totals, in: interval)
+                guard let nextDay = calendar.date(byAdding: .day, value: 1, to: day) else { break }
+                day = nextDay
+            }
+        }
+
+        return totals
+    }
+
+    private static func allocationDayCount(for record: WaterRecord, calendar: Calendar) -> Int {
+        guard let endTime = record.endTime else { return 1 }
+
+        let startDay = calendar.startOfDay(for: record.startTime)
+        let endDay = calendar.startOfDay(for: endTime)
+
+        if calendar.isDate(startDay, inSameDayAs: endDay) {
+            return 1
+        }
+
+        let days = calendar.dateComponents([.day], from: startDay, to: endDay).day ?? 1
+        return max(days, 1)
+    }
+
+    private static func add(
+        _ amount: Double,
+        on day: Date,
+        to totals: inout [Date: Double],
+        in interval: DateInterval
+    ) {
+        guard day >= interval.start && day < interval.end else { return }
+        totals[day, default: 0] += amount
+    }
+}
+
 // MARK: - WaterRecord
 /// 水の摂取セッションを記録するモデル
 @Model
@@ -160,7 +223,13 @@ final class WaterRecord: Identifiable {
     /// メモが有効かどうかを検証（オプショナル）
     func validateNote() -> Bool {
         guard let note = note else { return true } // 未入力は有効
-        return note.count <= 50
+        return note.count <= 80
+    }
+
+    /// 終了日時が有効かどうかを検証（終了時のみ）
+    func validateEndTime() -> Bool {
+        guard let endTime = endTime else { return true }
+        return endTime >= startTime
     }
     
     /// すべてのフィールドが有効かどうかを検証
@@ -169,7 +238,8 @@ final class WaterRecord: Identifiable {
                validateEndWeight() &&
                validateCatCount() &&
                validateTemperature() &&
-               validateNote()
+               validateNote() &&
+               validateEndTime()
     }
     
     /// バリデーションエラーメッセージを取得
@@ -210,11 +280,14 @@ final class WaterRecord: Identifiable {
         
         if !validateNote() {
             if let note = note {
-                errors.append("メモは50文字以内で入力してください（現在: \(note.count)文字）")
+                errors.append("メモは80文字以内で入力してください（現在: \(note.count)文字）")
             }
+        }
+
+        if !validateEndTime() {
+            errors.append("回収日時は設置日時以降にしてください")
         }
         
         return errors
     }
 }
-

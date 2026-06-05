@@ -11,26 +11,20 @@ struct PremiumIntroductionView: View {
     @Environment(\.dismiss) private var dismiss
     @AppStorage("isProMember") private var isProMember: Bool = false
     @State private var selectedPlan: PlanType = .yearly // 初期値を年間プランに変更
-    private let storeManager = StoreManager.shared
+    @State private var storeManager = StoreManager.shared
     @State private var isRestoring = false
     @State private var showingRestoreAlert = false
+    @State private var restoreAlertTitle = String(localized: "復元完了")
+    @State private var restoreAlertMessage = String(localized: "購入履歴の確認が完了しました。有効な購入がある場合は反映されています。")
     
     enum PlanType {
         case monthly
         case yearly
         
-        var price: String {
+        var productID: String {
             switch self {
-            case .monthly: return "¥180"
-            case .yearly: return "¥1,800"
-            }
-        }
-        
-        // 月額換算価格（年間プラン用）
-        var monthlyEquivalent: String? {
-            switch self {
-            case .monthly: return nil
-            case .yearly: return "¥150" // 1800 ÷ 12 = 150
+            case .monthly: return StoreManager.ProductID.monthly
+            case .yearly: return StoreManager.ProductID.yearly
             }
         }
         
@@ -108,6 +102,7 @@ struct PremiumIntroductionView: View {
                         // 年額プラン（先に表示）
                         PlanCard(
                             planType: .yearly,
+                            price: storeManager.displayPrice(for: StoreManager.ProductID.yearly),
                             isSelected: selectedPlan == .yearly
                         ) {
                             selectedPlan = .yearly
@@ -116,18 +111,32 @@ struct PremiumIntroductionView: View {
                         // 月額プラン（下部）
                         PlanCard(
                             planType: .monthly,
+                            price: storeManager.displayPrice(for: StoreManager.ProductID.monthly),
                             isSelected: selectedPlan == .monthly
                         ) {
                             selectedPlan = .monthly
                         }
                     }
                     .padding(.horizontal)
+
+                    if storeManager.isLoadingProducts {
+                        ProgressView("商品情報を読み込み中")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    } else if storeManager.productLoadError != nil {
+                        Text("商品情報を取得できませんでした。通信状態を確認してください。")
+                            .font(.caption)
+                            .foregroundColor(.red)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                    }
                     
                     // 買い切りプラン（Lifetime）
                     Button {
                         Task {
-                            await storeManager.purchaseLifetime()
-                            dismiss()
+                            if await storeManager.purchaseLifetime() {
+                                dismiss()
+                            }
                         }
                     } label: {
                         HStack {
@@ -136,21 +145,21 @@ struct PremiumIntroductionView: View {
                                     .font(.headline)
                                     .foregroundColor(.appMain)
                                 
-                                HStack(alignment: .firstTextBaseline, spacing: 4) {
-                                    Text("¥8,000")
-                                        .font(.title)
-                                        .fontWeight(.bold)
-                                        .foregroundColor(.appMain)
+	                                HStack(alignment: .firstTextBaseline, spacing: 4) {
+	                                    Text(storeManager.displayPrice(for: StoreManager.ProductID.lifetime))
+	                                        .font(.title)
+	                                        .fontWeight(.bold)
+	                                        .foregroundColor(.appMain)
                                     
                                     Text("(一括払い)")
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
                                 
-                                Text("年額プランの約4.5年分")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
+	                                Text("一度の購入で継続利用できます")
+	                                    .font(.caption)
+	                                    .foregroundColor(.secondary)
+	                            }
                             
                             Spacer()
                         }
@@ -165,14 +174,16 @@ struct PremiumIntroductionView: View {
                     }
                     .padding(.horizontal)
                     .padding(.top, 8)
+                    .disabled(!storeManager.isProductLoaded(StoreManager.ProductID.lifetime))
                     
                     // 購入ボタン
                     VStack(spacing: 12) {
-                        Button {
-                            Task {
-                                await storeManager.purchaseSubscription(planId: selectedPlan == .monthly ? StoreManager.ProductID.monthly : StoreManager.ProductID.yearly)
-                                dismiss()
-                            }
+	                        Button {
+	                            Task {
+	                                if await storeManager.purchaseSubscription(planId: selectedPlan.productID) {
+	                                    dismiss()
+	                                }
+	                            }
 
                         } label: {
                             // 【修正】文言を統一
@@ -181,9 +192,10 @@ struct PremiumIntroductionView: View {
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 56)
-                                .background(Color.appMain)
+                                .background(storeManager.isProductLoaded(selectedPlan.productID) ? Color.appMain : Color.disabledButtonBackground)
                                 .cornerRadius(.buttonCornerRadius)
-                        }
+	                        }
+	                        .disabled(!storeManager.isProductLoaded(selectedPlan.productID))
                         
                         // マイクロコピー: 安心感を与える
                         Text("いつでもキャンセル可能")
@@ -194,11 +206,20 @@ struct PremiumIntroductionView: View {
                             isRestoring = true
                             Task {
                                 do {
-                                    try await storeManager.restorePurchases()
+                                    let result = try await storeManager.restorePurchases()
+                                    switch result {
+                                    case .restored:
+                                        restoreAlertTitle = String(localized: "復元完了")
+                                        restoreAlertMessage = String(localized: "購入情報を反映しました。")
+                                    case .noPurchase:
+                                        restoreAlertTitle = String(localized: "購入履歴なし")
+                                        restoreAlertMessage = String(localized: "有効な購入履歴が見つかりませんでした。")
+                                    }
                                 } catch {
                                     print("Restore failed: \(error)")
+                                    restoreAlertTitle = String(localized: "復元に失敗しました")
+                                    restoreAlertMessage = String(localized: "通信状態を確認して、もう一度お試しください。")
                                 }
-                                // 成功・失敗に関わらず完了アラートを出す（本来は結果に応じて分岐）
                                 isRestoring = false
                                 showingRestoreAlert = true
                             }
@@ -251,18 +272,22 @@ struct PremiumIntroductionView: View {
                     }
                 }
             }
-            .alert("復元完了", isPresented: $showingRestoreAlert) {
+	            .alert(restoreAlertTitle, isPresented: $showingRestoreAlert) {
                 Button("OK", role: .cancel) { }
             } message: {
-                Text("購入履歴の確認が完了しました。有効な購入がある場合は反映されています。")
-            }
-        }
-    }
+	                Text(restoreAlertMessage)
+	            }
+	            .task {
+	                await storeManager.loadProducts()
+	            }
+	        }
+	    }
 }
 
 // MARK: - PlanCard
 struct PlanCard: View {
     let planType: PremiumIntroductionView.PlanType
+    let price: String
     let isSelected: Bool
     let action: () -> Void
     
@@ -276,21 +301,21 @@ struct PlanCard: View {
                             .foregroundColor(.appMain)
                         
                         // 価格表示（実際の決済総額を最も目立たせる）
-                        if let monthlyEquivalent = planType.monthlyEquivalent {
+                        if planType == .yearly {
                             // 年間プラン: 実際の決済総額（年額）を大きく表示
                             VStack(alignment: .leading, spacing: 4) {
-                                Text(planType.price)
+                                Text(price)
                                     .font(.title)
                                     .fontWeight(.bold)
                                     .foregroundColor(.appMain)
                                 
-                                Text("月額換算 \(monthlyEquivalent)")
+                                Text("年額プラン")
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                             }
                         } else {
                             // 月額プラン: そのまま表示
-                            Text(planType.price)
+                            Text(price)
                                 .font(.title)
                                 .fontWeight(.bold)
                                 .foregroundColor(.appMain)

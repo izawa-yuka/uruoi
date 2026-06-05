@@ -100,6 +100,13 @@ struct HistoryView: View {
             .onChange(of: records) { _, _ in
                 recordViewModel.calculateWeeklyAverage(using: modelContext)
             }
+            .alert("エラーが発生しました", isPresented: $recordViewModel.showError) {
+                Button("OK", role: .cancel) { recordViewModel.clearError() }
+            } message: {
+                if let errorMessage = recordViewModel.lastError {
+                    Text(errorMessage)
+                }
+            }
         }
     }
     
@@ -109,11 +116,12 @@ struct HistoryView: View {
                 if index < items.count {
                     let item = items[index]
                     if let record = modelContext.model(for: item.recordID) as? WaterRecord {
-                        modelContext.delete(record)
+                        Task {
+                            _ = await recordViewModel.deleteRecord(record, modelContext: modelContext)
+                        }
                     }
                 }
             }
-            try? modelContext.save()
         }
     }
     
@@ -200,7 +208,7 @@ struct TimelineRow: View {
                         }
                         .foregroundColor(.primary)
                     }
-                    Text("残量: \(Int(item.weight))g")
+                    Text("回収時の重さ: \(Int(item.weight))g")
                         .font(.caption)
                         .foregroundColor(.secondary)
                         .monospacedDigit()

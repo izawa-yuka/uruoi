@@ -12,7 +12,7 @@ import Foundation
 
 // MARK: - FirestoreContainer
 /// Firestoreに保存するための器（Container）モデル
-struct FirestoreContainer: Codable, Identifiable {
+struct FirestoreContainer: Codable, Equatable, Identifiable {
     let id: String // UUIDをStringとして保存
     let name: String
     let emptyWeight: Double
@@ -33,7 +33,7 @@ struct FirestoreContainer: Codable, Identifiable {
 
 // MARK: - FirestoreRecord
 /// Firestoreに保存するための記録（Record）モデル
-struct FirestoreRecord: Codable, Identifiable {
+struct FirestoreRecord: Codable, Equatable, Identifiable {
     let id: String
     let containerID: String
     let startTime: Date

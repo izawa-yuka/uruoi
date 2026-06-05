@@ -14,7 +14,21 @@
 
   ],
   "products" : [
-
+    {
+      "displayPrice" : "49.99",
+      "familyShareable" : false,
+      "internalID" : "9F5B7B36",
+      "localizations" : [
+        {
+          "description" : "",
+          "displayName" : "",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.hebereke.uruoi.lifetime",
+      "referenceName" : "com.hebereke.uruoi.lifetime",
+      "type" : "NonConsumable"
+    }
   ],
   "settings" : {
     "_askToBuyEnabled" : false,
@@ -60,6 +74,34 @@
           "productID" : "com.hebereke.uruoi.monthly",
           "recurringSubscriptionPeriod" : "P1M",
           "referenceName" : "com.hebereke.uruoi.monthly",
+          "subscriptionGroupID" : "CEFB3424",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "9.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "7AE8C021",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "",
+              "displayName" : "",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.hebereke.uruoi.yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "com.hebereke.uruoi.yearly",
           "subscriptionGroupID" : "CEFB3424",
           "type" : "RecurringSubscription",
           "winbackOffers" : [

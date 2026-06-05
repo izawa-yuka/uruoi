@@ -125,10 +125,7 @@ final class HistoryViewModel {
         let start = interval.start
         let end = interval.end
         
-        let filteredRecords = records.filter { record in
-            guard let recordEnd = record.endTime else { return false }
-            return recordEnd >= start && recordEnd < end
-        }
+        let dailyTotals = WaterIntakeCalculator.dailyTotals(from: records, in: interval, calendar: calendar)
         
         var result: [PeriodIntakeData] = []
         var dateIterator = start
@@ -166,12 +163,10 @@ final class HistoryViewModel {
             // 無限ループ防止（万が一 nextDate が進まない場合）
             if nextDate <= dateIterator { break }
             
-            let recordsInChunk = filteredRecords.filter {
-                guard let rEnd = $0.endTime else { return false }
-                return rEnd >= dateIterator && rEnd < nextDate
+            let amount = dailyTotals.reduce(0) { partialResult, entry in
+                let day = entry.key
+                return day >= dateIterator && day < nextDate ? partialResult + entry.value : partialResult
             }
-            
-            let amount = recordsInChunk.reduce(0) { $0 + ($1.amount ?? 0) }
             result.append(PeriodIntakeData(date: dateIterator, totalAmount: amount, label: label))
             
             dateIterator = nextDate

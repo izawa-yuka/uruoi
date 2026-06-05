@@ -57,20 +57,24 @@ struct InputValidator {
     /// - Parameter weight: 検証する重量（g）
     /// - Returns: 有効な場合はtrue
     static func isValidWeight(_ weight: Double) -> Bool {
-        // 0以上、50kg（50000g）以下
-        return weight >= 0 && weight <= 50000
+        // 0以上、10kg（10000g）以下
+        return weight >= 0 && weight <= 10000
     }
     
     /// 重量を検証し、エラーメッセージを返す
     /// - Parameter weight: 検証する重量（g）
     /// - Returns: エラーメッセージ（有効な場合はnil）
     static func validateWeight(_ weight: Double) -> String? {
+        if !weight.isFinite {
+            return "重量は数値で入力してください"
+        }
+
         if weight < 0 {
             return "重量は0以上の値を入力してください"
         }
         
-        if weight > 50000 {
-            return "重量は50kg（50000g）以下で入力してください"
+        if weight > 10000 {
+            return "重量は10kg（10000g）以下で入力してください"
         }
         
         return nil
@@ -152,23 +156,20 @@ struct InputValidator {
     /// - Parameter temperature: 検証する温度（℃）
     /// - Returns: 有効な場合はtrue
     static func isValidTemperature(_ temperature: Double) -> Bool {
-        return temperature >= -50 && temperature <= 70
+        return temperature >= -50 && temperature <= 60
     }
     
     /// 温度を検証し、エラーメッセージを返す
     /// - Parameter temperature: 検証する温度（℃）
     /// - Returns: エラーメッセージ（有効な場合はnil）
     static func validateTemperature(_ temperature: Double) -> String? {
-        if temperature < -50 || temperature > 70 {
-            return "温度は-50℃〜70℃の範囲で入力してください"
+        if temperature < -50 || temperature > 60 {
+            return "温度は-50℃〜60℃の範囲で入力してください"
         }
         
         return nil
     }
 }
-
-
-
 
 
 
