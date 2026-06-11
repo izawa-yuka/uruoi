@@ -1599,6 +1599,26 @@
         }
       }
     },
+    "回収時の器の重さを確認しやすく" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Easier to check bowl weight at collection"
+          }
+        }
+      }
+    },
+    "回収時に入力した器の重さを、履歴や記録の詳細で確認しやすくしました。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The bowl weight entered at collection is now easier to check in History and record details."
+          }
+        }
+      }
+    },
     "回収時の重さ: %lldg" : {
       "localizations" : {
         "en" : {
@@ -1843,6 +1863,16 @@
         }
       }
     },
+    "毎日水を交換しない場合でも、複数日分の記録を日ごとの飲水量として扱い、より実態に近い平均を確認できるようになりました。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Even when water is not changed every day, multi-day records are now treated as daily water intake, making the average closer to actual usage."
+          }
+        }
+      }
+    },
     "平均値の計算が正しく反映されない問題や、履歴削除時の不具合などを修正しました。" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1997,6 +2027,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "A new version of URUOI is available. Please update from the App Store."
+          }
+        }
+      }
+    },
+    "直近7日間の平均飲水量を改善" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Improved the 7-day average water intake"
           }
         }
       }

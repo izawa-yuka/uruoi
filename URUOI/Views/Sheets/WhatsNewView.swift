@@ -28,9 +28,15 @@ struct WhatsNewView: View {
                     // アップデート内容リスト
                     VStack(alignment: .leading, spacing: 28) {
                         featureRow(
-                            icon: "rectangle.and.arrow.up.right.and.arrow.down.left",
-                            title: "器の追加画面を引き上げられるように",
-                            description: "器を追加するモーダルが途中で止まってしまう不具合を修正しました。上にスワイプしてフルスクリーンでお使いいただけます。"
+                            icon: "chart.line.uptrend.xyaxis",
+                            title: "直近7日間の平均飲水量を改善",
+                            description: "毎日水を交換しない場合でも、複数日分の記録を日ごとの飲水量として扱い、より実態に近い平均を確認できるようになりました。"
+                        )
+
+                        featureRow(
+                            icon: "scalemass.fill",
+                            title: "回収時の器の重さを確認しやすく",
+                            description: "回収時に入力した器の重さを、履歴や記録の詳細で確認しやすくしました。"
                         )
 
                         featureRow(
