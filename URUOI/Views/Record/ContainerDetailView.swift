@@ -644,7 +644,11 @@ struct ContainerTimelineRow: View {
     let isFirst: Bool
     
     private var record: WaterRecord? { let id = item.recordID; return modelContext.model(for: id) as? WaterRecord }
-    private var isAbnormal: Bool { guard let r = record else { return false }; return viewModel.isRecordAbnormal(r, modelContext: modelContext) }
+    private var alertDifferenceText: String? {
+        guard item.type == .collection, let record else { return nil }
+        return viewModel.alertRangeDifferenceText(for: record, modelContext: modelContext)
+    }
+    private var isAbnormal: Bool { alertDifferenceText != nil }
     
     private var isRecording: Bool {
         guard let r = record else { return false }
@@ -652,29 +656,46 @@ struct ContainerTimelineRow: View {
     }
     
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            Text(historyViewModel.formatTime(item.date)).font(.subheadline).foregroundColor(.secondary).frame(width: 50, alignment: .leading).monospacedDigit()
-            HStack(spacing: 8) {
-                Image(systemName: item.type == .setup ? "arrow.down.circle.fill" : (isAbnormal ? "exclamationmark.triangle.fill" : "checkmark.circle.fill"))
-                    .foregroundColor(item.type == .setup ? .appMain : (isAbnormal ? .alertOrange : .green)).font(.title3)
-                VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(alignment: .center, spacing: 12) {
+                Text(historyViewModel.formatTime(item.date)).font(.subheadline).foregroundColor(.secondary).frame(width: 50, alignment: .leading).monospacedDigit()
+                HStack(spacing: 8) {
+                    Image(systemName: item.type == .setup ? "arrow.down.circle.fill" : (isAbnormal ? "exclamationmark.triangle.fill" : "checkmark.circle.fill"))
+                        .foregroundColor(item.type == .setup ? .appMain : (isAbnormal ? .alertOrange : .green)).font(.title3)
                     Text(item.type == .setup ? (isFirst ? String(localized: "設置中") : String(localized: "設置")) : String(localized: "回収"))
                         .font(.body).fontWeight(isFirst ? .bold : .regular)
-                    if item.type == .collection, let t = item.temperature { Text("\(Int(t))℃").font(.caption).foregroundColor(.secondary) }
                 }
+                Spacer()
+                VStack(alignment: .trailing, spacing: 4) {
+                    if item.type == .setup { Text("\(item.weight.safeDisplayInt)g").monospacedDigit() }
+                    else if let amount = item.amount {
+                        Text("\(amount.safeDisplayInt)ml").fontWeight(.bold).monospacedDigit()
+                    }
+                }
+                Image(systemName: "chevron.right").font(.caption).foregroundColor(.secondary.opacity(0.5)).padding(.leading, 4).padding(.top, 4)
             }
-            Spacer()
-            VStack(alignment: .trailing, spacing: 4) {
-                if item.type == .setup { Text("\(item.weight.safeDisplayInt)g").monospacedDigit() }
-                else if let amount = item.amount {
-                    Text("\(amount.safeDisplayInt)ml").fontWeight(.bold).monospacedDigit()
+
+            if item.type == .collection {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    if let alertDifferenceText {
+                        Text(alertDifferenceText)
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.75)
+                            .monospacedDigit()
+                    } else if let t = item.temperature {
+                        Text("\(Int(t))℃").font(.caption).foregroundColor(.secondary)
+                    }
+                    Spacer(minLength: 8)
                     Text(String(localized: "回収時の重さ: \(item.weight.safeDisplayInt)g"))
                         .font(.caption)
                         .foregroundColor(.secondary)
+                        .lineLimit(1)
                         .monospacedDigit()
                 }
+                .frame(height: 18, alignment: .center)
             }
-            Image(systemName: "chevron.right").font(.caption).foregroundColor(.secondary.opacity(0.5)).padding(.leading, 4).padding(.top, 4)
         }
         // ▼▼▼ 修正: commonShadow -> cardShadow ▼▼▼
         .padding().background(Color.white).cornerRadius(.cardCornerRadius).cardShadow()

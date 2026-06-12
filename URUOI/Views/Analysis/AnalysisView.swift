@@ -37,6 +37,10 @@ struct AnalysisView: View {
     private var highlightData: [PeriodIntakeData] {
         chartData.filter { isCurrentPeriod($0.date) }
     }
+
+    private var collectionData: [PeriodIntakeData] {
+        chartData.filter { $0.hasCollection }
+    }
     
     private var periodAverage: Double {
         cachedPeriodAverage
@@ -57,6 +61,10 @@ struct AnalysisView: View {
     private var chartYScaleDomain: Double {
         let maxAmount = periodData.map { $0.totalAmount }.max() ?? 0
         return max(maxAmount * 1.2, 1000)
+    }
+
+    private var hasChartContent: Bool {
+        periodData.contains { $0.totalAmount > 0 || $0.hasCollection }
     }
     
     var body: some View {
@@ -163,16 +171,25 @@ struct AnalysisView: View {
     // ▼▼▼ 修正点2: .commonShadow() を削除（グラフカード） ▼▼▼
     private var chartCard: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text(String(localized: "飲水量の推移"))
-                .font(.headline)
-                .foregroundColor(.primary)
-                .padding(.horizontal)
-            if periodData.isEmpty {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(String(localized: "飲水量の推移"))
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                Text(String(localized: "飲水量は日割りで表示しています。回収日はチェックマークで確認できます。"))
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+            .padding(.horizontal)
+            if !hasChartContent {
                 emptyChart
             } else {
                 let isUnlocked = isProMember || viewModel.selectedPeriod == .week
                 ZStack {
-                    chart.blur(radius: isUnlocked ? 0 : 10)
+                    VStack(alignment: .leading, spacing: 8) {
+                        chart
+                        chartLegend
+                    }
+                    .blur(radius: isUnlocked ? 0 : 10)
                     if !isUnlocked { ProLockOverlay(showingPremiumIntro: $showingPremiumIntro) }
                 }
                 .onTapGesture { if !isUnlocked { showingPremiumIntro = true } }
@@ -204,6 +221,18 @@ struct AnalysisView: View {
                 BarMark(x: .value(String(localized: "期間"), data.label), y: .value(String(localized: "飲水量"), data.totalAmount))
                     .foregroundStyle(Color.appMain).cornerRadius(4)
             }
+            ForEach(collectionData) { data in
+                PointMark(
+                    x: .value(String(localized: "期間"), data.label),
+                    y: .value(String(localized: "回収"), chartYScaleDomain * 0.06)
+                )
+                .symbol {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.caption)
+                        .foregroundColor(.green)
+                        .background(Circle().fill(Color(.systemBackground)))
+                }
+            }
         }
         .chartXScale(domain: chartData.map { $0.label })
         .chartYScale(domain: 0...chartYScaleDomain)
@@ -230,6 +259,14 @@ struct AnalysisView: View {
         }
         .padding(.bottom, viewModel.selectedPeriod == .year ? 16 : 0).frame(height: 300).padding(.horizontal)
     }
+
+    private var chartLegend: some View {
+        HStack(spacing: 16) {
+            ChartLegendItem(color: .appMain, title: String(localized: "飲水量"))
+            ChartLegendItem(color: .green, title: String(localized: "回収"), systemImage: "checkmark.circle.fill")
+        }
+        .padding(.horizontal)
+    }
     
     private func shouldShowGrid(for label: String) -> Bool {
         switch viewModel.selectedPeriod {
@@ -253,13 +290,7 @@ struct AnalysisView: View {
                     .font(.headline)
                     .foregroundColor(.primary)
                 
-                let periodText = switch viewModel.selectedPeriod {
-                    case .week: String(localized: "過去7日間")
-                    case .month: String(localized: "今月")
-                    case .year: String(localized: "今年")
-                }
-                
-                Text(periodText)
+                Text(viewModel.selectedPeriod.periodTitle(for: viewModel.currentDate))
                     .font(.caption).foregroundColor(.secondary)
             }
             Spacer()
@@ -287,6 +318,29 @@ struct AnalysisView: View {
         case .year:
             return calendar.component(.month, from: Date()) == calendar.component(.month, from: date) &&
                    calendar.component(.year, from: Date()) == calendar.component(.year, from: date)
+        }
+    }
+}
+
+private struct ChartLegendItem: View {
+    let color: Color
+    let title: String
+    var systemImage: String?
+
+    var body: some View {
+        HStack(spacing: 6) {
+            if let systemImage {
+                Image(systemName: systemImage)
+                    .font(.caption2)
+                    .foregroundColor(color)
+            } else {
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(color)
+                    .frame(width: 14, height: 8)
+            }
+            Text(title)
+                .font(.caption2)
+                .foregroundColor(.secondary)
         }
     }
 }

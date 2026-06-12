@@ -941,6 +941,49 @@ final class RecordViewModel {
         }
     }
 
+    func alertRangeDifferenceText(for record: WaterRecord, modelContext: ModelContext) -> String? {
+        guard let recordAmount = WaterIntakeCalculator.normalizedDailyAmount(for: record) else { return nil }
+        let recordID = record.id
+        let targetContainerID = record.containerID
+
+        let descriptor = FetchDescriptor<WaterRecord>(
+            predicate: #Predicate {
+                $0.containerID == targetContainerID
+            },
+            sortBy: [SortDescriptor(\.startTime, order: .reverse)]
+        )
+
+        do {
+            let allRecords = try modelContext.fetch(descriptor)
+            let pastAmounts = allRecords
+                .filter { $0.endTime != nil && $0.id != recordID }
+                .compactMap { WaterIntakeCalculator.normalizedDailyAmount(for: $0) }
+                .filter { $0 > 0 }
+                .prefix(20)
+
+            guard pastAmounts.count >= 1 else { return nil }
+
+            let average = pastAmounts.reduce(0, +) / Double(pastAmounts.count)
+            let lowerBound = average * 0.5
+            let upperBound = average * 1.5
+
+            if recordAmount >= upperBound {
+                let difference = Int((recordAmount - upperBound).rounded())
+                return String(localized: "アラート範囲より \(difference)ml 多いです")
+            }
+
+            if recordAmount <= lowerBound {
+                let difference = Int((lowerBound - recordAmount).rounded())
+                return String(localized: "アラート範囲より \(difference)ml 少ないです")
+            }
+
+            return nil
+        } catch {
+            setError(String(localized: "記録の異常チェックに失敗しました"), error: error)
+            return nil
+        }
+    }
+
     /// 1回の記録が平均の半分以下（少なすぎ）かどうかを判定する
     private func isRecordLow(_ record: WaterRecord, modelContext: ModelContext) -> Bool {
         guard let recordAmount = WaterIntakeCalculator.normalizedDailyAmount(for: record) else { return false }

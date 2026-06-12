@@ -80,6 +80,7 @@ struct PeriodIntakeData: Identifiable, Equatable {
     let date: Date
     let totalAmount: Double
     let label: String
+    let hasCollection: Bool
 }
 
 // MARK: - HistoryViewModel
@@ -167,7 +168,18 @@ final class HistoryViewModel {
                 let day = entry.key
                 return day >= dateIterator && day < nextDate ? partialResult + entry.value : partialResult
             }
-            result.append(PeriodIntakeData(date: dateIterator, totalAmount: amount, label: label))
+
+            let hasCollection = records.contains {
+                guard let rEnd = $0.endTime else { return false }
+                return rEnd >= dateIterator && rEnd < nextDate
+            }
+
+            result.append(PeriodIntakeData(
+                date: dateIterator,
+                totalAmount: amount,
+                label: label,
+                hasCollection: hasCollection
+            ))
             
             dateIterator = nextDate
         }

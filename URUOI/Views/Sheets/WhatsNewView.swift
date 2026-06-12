@@ -29,20 +29,20 @@ struct WhatsNewView: View {
                     VStack(alignment: .leading, spacing: 28) {
                         featureRow(
                             icon: "chart.line.uptrend.xyaxis",
-                            title: "直近7日間の平均飲水量を改善",
-                            description: "毎日水を交換しない場合でも、複数日分の記録を日ごとの飲水量として扱い、より実態に近い平均を確認できるようになりました。"
+                            title: "飲水量グラフを日割り表示に対応",
+                            description: "複数日分の記録も日ごとの飲水量として表示し、日々の変化を確認しやすくしました。"
                         )
 
                         featureRow(
-                            icon: "scalemass.fill",
-                            title: "回収時の器の重さを確認しやすく",
-                            description: "回収時に入力した器の重さを、履歴や記録の詳細で確認しやすくしました。"
+                            icon: "checkmark.circle.fill",
+                            title: "回収日がグラフでわかりやすく",
+                            description: "回収日はグラフ上のチェックマークで確認できます。棒グラフは日割りの飲水量のまま表示されます。"
                         )
 
                         featureRow(
                             icon: "wrench.adjustable.fill",
-                            title: "その他、軽微なバグ修正",
-                            description: "アプリをより安定してご利用いただけるよう、細かな不具合を修正しました。"
+                            title: "英語表示と軽微な不具合を修正",
+                            description: "英語表示の抜けを補い、アプリをより安定して使えるよう細かな調整を行いました。"
                         )
                     }
                     .padding(.horizontal, 24)
